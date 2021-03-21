@@ -1,0 +1,87 @@
+ion-toolbar.hero{
+    --background:black; 
+
+}
+.hero ion-img{
+   width: 100%;
+   max-height: 500px;
+   object-fit: cover;
+   opacity: 0.6;
+}
+.dark-back{
+    height: 100%;
+    background-color: black;
+    color: white;
+    position: relative;
+      padding: 20px;
+    
+    
+}
+
+ion-col h3{
+     font-size: 20px;
+}
+.about-content{
+    --background:linear-gradient(to bottom, #123a91,#1e4088,#3c61b1 );
+}
+body.dark .about-content{
+    --background:linear-gradient(to bottom,  #091227,#1b3063,#153475 );
+}
+.about-content ion-slides.slides{
+    height: 100vh;
+    width: 100%;
+}
+  ion-slides.slides ion-slide{
+   
+}
+ion-slides.slides ion-slide>div{
+    background-image: linear-gradient(to bottom, #0d2c6d,#1e4088,#3c61b1 );
+     color: white;
+    height: 100%;
+     width: 100%;
+     padding: 40% 20px 0 20px;
+     font-size: 23px;
+}
+body.dark ion-slides.slides ion-slide>div{
+    background-image: linear-gradient(to bottom, #091227,#182950,#153475);
+
+    
+}
+div.icon {
+  margin-top: 50%;
+}
+div.icon *{
+    position: absolute;
+     display: block;
+     
+}
+div.icon ion-icon{
+    left: 45%;
+    transform: scale(1.8);
+}
+div.icon label{
+    left: 42%;
+    transform: translateY(50px);
+}
+div.icon ion-button{
+    left: 40%;
+    transform: translateY(50px);
+}
+/* }
+div.one{
+    background-image: linear-gradient(to bottom, #0d2c6d,#264fa7,#4a7eec );
+}
+div.two{
+     
+    background-image: linear-gradient(to bottom, #1c3d86,#44619e,#5476be );
+
+}
+div.three{
+    background-image: linear-gradient(to bottom, #070e08,#1d1f1d,#464646);
+    color: white;
+}
+div.four{
+   
+    background-image: linear-gradient(to bottom, #551926,#6e2839,#923f5b);
+
+} */

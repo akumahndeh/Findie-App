@@ -1,0 +1,19 @@
+.info-skeleton{
+    padding:20px;
+
+}
+
+.info-skeleton>ion-skeleton-text{
+    height: 100px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+}
+ion-text{
+    font-size: 20px;
+}
+p.images>ion-img{
+    margin-bottom: 10px; 
+}
+.info-card {
+   --ion-background-color:white
+}

@@ -1,0 +1,43 @@
+  ion-card{
+      max-width: 600px;
+      
+  }
+  
+  ion-tab-button{
+     color:rgb(224, 224, 228);
+    --color-selected:rgb(247, 247, 247);
+    /* transition: 0.25s; */
+     opacity: 0.5;
+}
+ion-header>ion-toolbar{
+    --ion-light-color:white
+}
+ion-header>ion-toolbar>ion-title{
+    text-transform: capitalize;
+ }
+ion-tab-button>ion-label{
+    font-size: 13px;
+}
+ion-tab-button::before{
+    background-color: transparent ;
+    display: block;
+    content:" ";
+    margin: 0 auto;
+    width:10px;
+    height: 2px;
+    /* transition: 0.25s; */
+} 
+.tab-selected{
+    color:rgb(255, 255, 255);
+    opacity: 1;
+}
+.tab-selected ion-label{
+    font-size: 15px;
+   
+}
+.tab-selected::before{
+    background-color: white;
+    
+}
+ 
+ 

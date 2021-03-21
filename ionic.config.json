@@ -1,0 +1,7 @@
+{
+  "name": "Findie",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

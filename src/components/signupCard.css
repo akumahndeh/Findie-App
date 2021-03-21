@@ -1,0 +1,6 @@
+ion-select{
+  text-transform: capitalize !important;   
+}
+.faculty-options *{
+  text-transform: capitalize !important;   
+}

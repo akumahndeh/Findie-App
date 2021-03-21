@@ -1,0 +1,103 @@
+
+ion-text, ion-label,ion-note{
+   font-size: 13px;
+}
+body.dark form ion-button {
+  --color:rgb(35, 60, 145);
+}
+.more-button{
+    margin-top:-80px;
+    margin-left:40%
+}
+.post-img{
+    --ion-background-color:black
+}
+
+.imageless-text{
+    padding: 20px ;
+ }
+ .imageless-text>ion-label{
+   font-size: 20px;
+   margin-top: 10px;
+   
+ }
+ .imageless-text ion-label a{
+    text-decoration: underline;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: rgba(52, 101, 158, 0.726);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    text-overflow: ellipsis;
+    color: black; 
+     
+   
+ }
+ .animated-popover, .animated-popover ion-header{
+       --background:transparent;
+ }
+ 
+ .animated-popover {
+    padding :60% 10px 0 4px;
+ }
+ .animated-popover .comment-card{
+    border-radius: 10px 10px 0 0;
+    background-color: white;
+
+
+ }
+ .animated-popover .comment-card ion-card-content{
+   overflow: scroll;
+
+ }
+ .animated-popover  ion-toolbar{
+     border-radius: 10px 10px 0 0;
+   padding-left: 10px;
+     }
+ 
+     /* ion-card ion-toolbar .card-grid{
+       padding: 0 10px 20px 10px;
+     } */
+     ion-card.social-card{
+       padding-bottom: 40px;
+       margin-bottom: 20px;
+     }
+     
+       .reactions label{
+      color: black;
+    }
+     
+     body.dark  ion-card.social-card *,  body.dark  ion-card.social-card{
+        --background:rgb(36, 36, 39);
+     }
+     body.dark .reactions label{
+       color: white;
+     }
+.img-container ion-slide{
+  display: block; 
+}
+.img-container ion-slides ion-slide ion-img,.img-container ion-slides ion-slide img{
+ height: 60vh;
+  object-fit: contain;
+  
+}
+.img-container ion-slides{
+  
+  --bullet-background:rgb(131, 131, 134);
+  --progress-bar-background-active:rgb(206, 83, 83);
+}
+
+body.dark .img-container ion-slides{
+  --bullet-background:white;
+  --bullet-background-active:rgb(35, 60, 145);
+
+}
+.image-download{
+  background-size: contain;
+}
+.image-download ion-img,.image-download img{
+  backdrop-filter: blur(20px);
+ 
+
+}

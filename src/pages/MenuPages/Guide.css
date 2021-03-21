@@ -1,0 +1,54 @@
+.guide-content{
+    background-color: #f4f5f8;
+     
+    padding-bottom: 70px;
+}
+.links{
+    --background: #f4f5f8;
+    padding:0 10px;
+}
+.links ion-label{
+  font-weight: 700;
+  text-transform: capitalize;
+  
+}
+.links ion-item{
+    margin:6px 0 0 0;
+    box-shadow: 1px 1px 10px rgba(0,0,0,.15);
+}
+.links ion-note{
+    margin:10px 0 10px 0 
+}
+p.paragraph ion-text{
+    font-size: 13px;
+}
+body.dark .guide-content{
+    --background:rgb(17, 19, 26);
+    --ion-color-light: rgb(17, 19, 26);
+}
+body.dark .guide-info ion-content{
+    --background:rgb(17, 19, 26);
+     --color:rgb(230, 227, 227);
+}
+.chip-container{
+    overflow-y:scroll;
+    width:100%;
+    padding:10px;
+}
+.guide-info ion-header ion-toolbar ion-label{
+   font-size: 14px;
+   text-transform: capitalize;
+   margin-left: 10px;
+}
+.guide-info  ion-progress-bar.read-progress{
+    
+     --buffer-background:  rgba(41, 80, 163, 0.842);
+      --progress-background: rgb(30, 63, 136);
+      margin: 0;
+}
+body.dark .guide-info  ion-progress-bar.read-progress{
+    
+    --buffer-background:  #0b1e3bc4;
+     --progress-background:#0e1d36;
+    
+}

@@ -1,0 +1,37 @@
+link,Link,ion-router-link{
+    text-decoration: none;
+   
+}
+ion-search-bar{
+    --ion-color-light:white
+}
+
+ion-list.container{
+  --ion-background-color:#f4f5f8
+}
+div.post-container{
+  --ion-background-color:white;
+  margin-bottom: 30px;
+}
+div.post-container ion-slides{
+    height: 400px;
+    --ion-background-color:white;
+    --bullet-background:white;
+    /* --progress-bar-background-active:white; */
+}
+div.post-container ion-slides ion-badge{
+    font-size: 20px;
+}
+.post-container>ion-card{
+    margin:0
+}
+
+.post-container ion-item ion-row{
+    padding: 6px 0px;
+}
+
+/* .post{
+     height:100px ;
+     width:100%;
+     max-width: 100px;
+} */

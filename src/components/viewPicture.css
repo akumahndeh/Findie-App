@@ -1,0 +1,18 @@
+ion-modal.pic-modal,ion-modal.pic-modal ion-content{
+    --background:rgba(0,0,0,0.7);
+}
+ion-modal.pic-modal ion-content  img{
+   margin-top: 40%;
+}
+.desc-text {
+    padding:10px;
+    --background:transparent;
+}
+.desc-text *{
+    font-size:15px;
+    color: white;
+    
+}
+body.dark .pic-modal ion-header ion-toolbar{
+   --ion-color-light: white;
+}

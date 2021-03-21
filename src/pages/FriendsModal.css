@@ -1,0 +1,31 @@
+ion-modal.friends-modal>ion-header{
+     height: 100vh;
+     overflow-y: scroll;
+}
+ion-modal.friends-modal{
+    padding-top: 40%;
+    --ion-background-color: rgba(0,0,0,0.23);
+}
+ion-modal.friends-modal>ion-header,ion-modal.friends-modal>ion-header>ion-toolbar{
+    border-radius: 10px 10px 0 0;
+    --ion-background-color: rgba(204, 182, 182, 0.23);
+}
+ion-modal.friends-modal ion-content{
+    padding: 15px 10px;
+    --ion-background-color: white;
+    height: 80vh;
+    overflow: scroll;
+}
+
+ ion-modal.friends-modal .content{ 
+    background-color: white;
+     border-radius: 20px 20px 0 0;
+    padding: 15px 10px 5px 10px;
+} 
+ion-modal.friends-modal  .line{
+    height: 3px ;
+    width: 40%;
+    background-color: rgb(80, 75, 75);
+    border-radius: 20px;
+    margin: 0px auto;
+}

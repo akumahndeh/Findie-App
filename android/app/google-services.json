@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "932527026886",
+    "firebase_url": "https://findieapp.firebaseio.com",
+    "project_id": "findieapp",
+    "storage_bucket": "findieapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:932527026886:android:83aaadc4a24cd737daddc7",
+        "android_client_info": {
+          "package_name": "app.web.findieapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "932527026886-ldusb7vlkhcp30ueu94d36s3j8j268fj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBNE8OaAuJmbmsnygwGBAQAnK3rxpF7EZw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "932527026886-ldusb7vlkhcp30ueu94d36s3j8j268fj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

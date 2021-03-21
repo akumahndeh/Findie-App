@@ -1,0 +1,117 @@
+.content ion-avatar{
+    height: 50%;
+    width:50%;
+    margin:auto;
+    margin-top: 10%;
+
+}
+body.dark .profile-content{
+  --ion-color-primary:rgb(6, 78, 146);
+}
+body.dark .profile-content ion-button ion-label{
+    color:white
+}
+ion-col .info{
+    width: 70%;
+    margin: auto;
+}
+div.pro{ 
+    position: fixed; 
+     /* display: none; */
+}
+
+ div.pro ion-toolbar{
+    /* --ion-color-light:rgb(134, 128, 128); */
+    --ion-color-primary:transparent;
+    padding-top: 20px;
+}
+.dp-con{
+    background-color: black;
+    position: fixed;
+    width: 100%;
+    padding: 0;
+    
+  
+
+}
+img.dp{
+     opacity: 0.728555;
+     width: 100%;
+     height: 80vh;
+     object-fit: cover;
+      
+}
+ion-card.profile-card {
+    transform: translateY(60%);
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+}
+ion-card.profile-card.two{
+    transform: translateY(0px);
+
+}
+ion-card.profile-card{
+    --ion-color-light:rgb(255, 255, 255);
+
+}
+ion-avatar.fab{
+    height: 90px;
+    width: 90px;
+    position: absolute; 
+     
+}
+ion-card.profile-card ion-card-header{
+    margin-bottom: 20px;
+}
+ion-card.profile-card ion-card-header ion-title{
+   text-transform: capitalize;
+   font-size: 22px;
+}
+ion-card.profile-card ion-note{
+    font-size: 14px;
+}
+
+ion-toolbar.edit{
+    padding: 30px  40px 20px 40px;
+}
+div.fab-image{
+     position: absolute;
+    right:6%;
+    top:63%;
+}
+div.fab-image ion-avatar{
+  height: 100px;
+  width: 100px;
+  border: 5px solid white;
+}
+body.dark div.fab-image ion-avatar{
+     
+    border: 5px solid rgb(6, 45, 71);
+  }
+  .caps{
+      text-transform: capitalize;
+  }
+  .upper{
+      text-transform: uppercase;
+  }
+
+  .goback{
+     position: fixed;
+     top:20px;
+     --background:transparent;
+      
+     --ion-color-light:white;
+  }
+  .goback ion-icon{
+      transform: scale(1.1);
+  }
+  .settings{
+    margin-top:40px;
+    padding: 10px;
+    margin-bottom: 20px;
+       
+  }
+  .settings ion-label ion-note{
+        font-size: 14px;
+        
+  }

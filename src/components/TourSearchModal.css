@@ -1,0 +1,14 @@
+.tour-search ion-searchbar{
+    margin-top: 10px;
+}
+.tour-search ion-grid ion-label.place-name{
+ text-transform: capitalize;
+ font-weight: 460;
+}
+.tour-search  ion-item{
+     
+}
+
+div.center-spinner{
+    padding: 40px 30%;
+}

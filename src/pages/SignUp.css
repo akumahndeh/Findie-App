@@ -1,0 +1,55 @@
+.signup-card ion-item ion-label{
+    text-transform: capitalize;
+}
+
+.signup-card{
+     transform:translateY(-100px);
+ 
+}
+.signup-card ion-slide{
+ display: block;
+ min-width: 80%;
+}
+.signup-card {
+    transform: translateY(200px);
+} 
+.pic-card .avatar{
+ 
+  /* margin-top: 50px;
+
+  width:100px ;
+  padding-top:10px; */
+  transform:translate(-30px) ;
+  height: 150px;
+  text-align: center;
+  margin-top: 20px;
+ 
+}
+.pic-card .avatar ion-avatar{
+    margin:auto;
+}
+
+.pic-card  ion-radio-group ion-text{
+    margin-left:30px;
+}
+.avatar{
+   
+
+}
+.avatar ion-img{
+    height: 150px;
+     width : 150px;
+     border: 1px solid rgba(28, 28, 216, 0.294);
+}
+ion-select-option{
+ text-transform: capitalize;
+}
+
+body.dark ion-button{
+    /* --ion-primary-color:rgb(197, 198, 202); */
+    /* --background:white; */
+    color:white
+}
+ion-img.back-img{
+    position: fixed;
+}

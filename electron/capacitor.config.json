@@ -1,0 +1,17 @@
+{
+  "appId": "app.web.findieapp",
+  "appName": "Findie",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "build",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    },
+    "LocalNotifications": {
+      "smalIcon": "ic_stat_logo",
+      "iconColor": "#0d2c6d"
+    }
+  },
+  "cordova": {}
+}

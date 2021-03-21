@@ -1,0 +1,6 @@
+.img-grid{
+    display:flex
+}
+body.dark .tb-create-gist{
+    --backround:white;
+ }
