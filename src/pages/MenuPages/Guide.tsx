@@ -7,6 +7,7 @@ import { getStorage } from "../Info"
 import { useHistory } from "react-router"
 import GuideInfo from "../GuideInfo"
 import { arrowBack } from "ionicons/icons"
+import { HapticVibrate } from "../../components/MapModal"
 
 // const GuideList=[
 //     {des:"application, rectification",
@@ -43,6 +44,7 @@ const Guide:React.FC=()=>{
            }else {
             Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
            }
+             HapticVibrate()
     })
     useIonViewDidEnter(() => {
         Plugins.StatusBar.setOverlaysWebView({

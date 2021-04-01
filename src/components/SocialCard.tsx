@@ -266,14 +266,17 @@ const SocialCard: React.FC<{ localImg: boolean, ReportPost: Function, Posts: Pos
                     {props.localImg ? <IonImg src={image} /> : <IonImg src={author?.image == person ? `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm_pzCGUjj2_BmLkB5HYgELYffuJ_aOQrAbQ&usqp=CAU` : author?.image}></IonImg>
                     } </IonAvatar> */}
                 <div className="avatar-online">
-                    <IonAvatar>
+                    <IonAvatar onClick={aboutAuthor}>
                         {props.localImg ? <IonImg src={image} /> : <IonImg src={author?.image == person ? `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTm_pzCGUjj2_BmLkB5HYgELYffuJ_aOQrAbQ&usqp=CAU` : author?.image}></IonImg>
                         }
                     </IonAvatar>
                    {(isOnline || props.localImg)&& <IonBadge color={`danger`}> </IonBadge>}
                 </div>
+                <IonButton fill={`clear`}>
                 <IonLabel onClick={aboutAuthor} style={{ textTransform: `capitalize` }}>{!props.localImg ? `${author?.firstName} ${author?.lastName}` : `You`}</IonLabel>
-                <IonButton onClick={getOptions} color={`dark`} fill={`clear`}>
+
+                </IonButton>
+                <IonButton slot={`end`} onClick={getOptions} color={`dark`} fill={`clear`}>
                     <IonIcon icon={ellipsisVertical}></IonIcon>
                 </IonButton>
             </IonItem>

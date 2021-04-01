@@ -150,6 +150,7 @@ const App: React.FC = () => {
 
 
     })
+ 
 
   }, []);
 
@@ -224,13 +225,13 @@ const App: React.FC = () => {
 
             <Route exact path="/guide" render={() => <IonPage><Header title={`Guide`} user={{}} /><Guide /></IonPage>} />
             <Route exact path="/tour" render={() => <Tour />} />
-            <Route exact path="/gist" render={() => <IonPage><Header title={`Gist`} user={{}} />{isAuth ? <Gist /> : <Home />}</IonPage>} />
+            {/* <Route exact path="/gist" render={() => <IonPage><Header title={`Gist`} user={{}} />{isAuth ? <Gist /> : <Home />}</IonPage>} /> */}
             <Route exact path="/info" render={() => <IonPage><Header title={`Info`} user={{}} />{isAuth ? <Info user={{}} /> : <Home />}</IonPage>} />
             <Route exact path="/" render={() => <IonPage><Header title={`Guide`} user={{}} /><Guide /></IonPage>} />
 
           </IonRouterOutlet>
 
-          <IonTabBar id={`tabbar`} selectedTab={`tour`} onClick={() => HapticVibrate()} color={`primary`} slot={`bottom`}>
+          <IonTabBar id={`tabbar`} selectedTab={`tour`}  color={`primary`} slot={`bottom`}>
             {/* <IonTabButton style={{display:`none`}} href={`/tour`} tab={`tour`}>
               <IonIcon icon={search} />
               <IonLabel>Tour</IonLabel>
@@ -243,11 +244,11 @@ const App: React.FC = () => {
               <IonIcon icon={search} />
               <IonLabel>Tour</IonLabel>
             </IonTabButton>
-            <IonTabButton href={`/gist`} tab={`gist`}>
+            {/* <IonTabButton href={`/gist`} tab={`gist`}>
               <IonIcon onClick={() => { if (newgist) setnewgist(false) }} icon={chatbox} />
               <IonLabel onClick={() => { if (newgist) setnewgist(false) }}>Gist</IonLabel>
               {newgist && <IonBadge color={`danger`}></IonBadge>}
-            </IonTabButton>
+            </IonTabButton> */}
             <IonTabButton href={`/info`} tab={`info`}>
               <IonIcon icon={information} />
               <IonLabel>Info</IonLabel>

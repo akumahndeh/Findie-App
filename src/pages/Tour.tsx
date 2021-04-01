@@ -18,8 +18,7 @@ const Tour: React.FC = () => {
     const [category, setcategory] = useState(All);
     const [currentCategory, setcurrentCategory] = useState(Classes);
     const [hint, sethint] = useState(true);
-     const [openSearch, setopenSearch] = useState(false);
-     const [loaded, setloaded] = useState(false);
+     const [openSearch, setopenSearch] = useState(false); 
      const [loadspinner, setloadspinner] = useState(false);
     const history = useHistory()
 
@@ -30,33 +29,8 @@ const Tour: React.FC = () => {
         sethint(false)
     })
     var t:any,k:any;
-    useEffect(() => {
-        getStorage(`firstTimer`).then((res) => {
-            if (res.value == `noMore`) {
-
-            } else {
-                Plugins.Storage.set({ key: `firstTimer`, value: `noMore` }).then(() => {
-                    history.push(`/Login`)
-                })
-            }
-        })
-    //     clearTimeout(t)
-    //     clearTimeout(k)
-    //   t=setTimeout(() => {
-    //     if(!loaded)   
-    //       setloaded(true)
-    //   }, 3000); 
-    //   k=setTimeout(() => {
-    //     if(!loadspinner)   
-    //       setloadspinner(true)
-    //   }, 7000);  
-
-       
-
-    }, []);
-    useIonViewDidEnter(()=>{
-        
-    })
+    
+   
 
     const searchValue = (event: any) => {
         const value = event.target.value.toLowerCase().replace(" ", "");
@@ -96,6 +70,7 @@ const Tour: React.FC = () => {
            }else {
             Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
            }
+             HapticVibrate()
     })
     useIonViewWillEnter(() => {
         Plugins.StatusBar.setOverlaysWebView({
@@ -117,18 +92,16 @@ const Tour: React.FC = () => {
             <IonContent className={`tour-content`}>
             <TourHeader getCategory={(cat: any) => { setcategory(cat); setcurrentCategory(cat); }} ></TourHeader>
                
-                  { loaded&&<>
+                  <>
                 
                <IonVirtualScroll style={{ overflowY: "scroll", marginBottom: "300px" }} items={All} >
-                    <ListBody loaded={loaded} category={getcat()} place={category}></ListBody>
+                    <ListBody   category={getcat()} place={category}></ListBody>
                     <div style={{ height: `100px` }}></div>
                 </IonVirtualScroll>
                 
                 </> 
-             }
-             <IonLoading  message={`loading places data...`} onDidDismiss={()=>{setloaded(true); setloadspinner(true)}} duration={1000} isOpen={!loadspinner}   cssClass={`loading spinner`} />
-             <IonLoading spinner={`lines-small`} message={`loading images`} onDidDismiss={()=>{}} duration={4000} isOpen={loaded}   cssClass={`loading spinner`} />
-              <TourSearchModal  onDidDismiss={()=>closeSearch()}  isOpen={openSearch} ></TourSearchModal>
+             
+               <TourSearchModal  onDidDismiss={()=>closeSearch()}  isOpen={openSearch} ></TourSearchModal>
              
                 </IonContent>
         </IonPage>
@@ -238,7 +211,7 @@ const TourHeader: React.FC<{ getCategory: Function }> = (props) => {
 
 
 
-const ListBody: React.FC<{ place: any[], category: string,loaded:boolean }> = (props) => {
+const ListBody: React.FC<{ place: any[], category: string }> = (props) => {
     const [tourData, settourData] = useState<any>();
 
     const openInfo = (obj: any) => {
@@ -256,27 +229,24 @@ const ListBody: React.FC<{ place: any[], category: string,loaded:boolean }> = (p
         <div className="ion-padding-top "  >
             
                    
-            {
+           <IonList>
+           {
                 props.place.map((item, index) => {
                     return (
                        
-                            <CreateAnimation key={index} play={props.loaded && index<=5} stop={!props.loaded && index>=5}
-                        duration={1300}
-                          fromTo={[{fromValue:`0`,toValue:`1`,property:`opacity`},
-                          {fromValue:`translateX(-${100+index*50}px)`,toValue:`translateX(0)`,property:`transform`},
-                         ]}
-                        >
+                        
                         <IonCard key={index} onClick={() => { openInfo({ ...props.place[index], "category": props.category }); HapticVibrate(); setloading(true) }} className="ion-margin tour-card ion-activatable ripple-parent">
                             <DestinationImg item={item} />
                             <IonRippleEffect></IonRippleEffect>
                             <IonButton fill="outline" color="light" style={{ marginTop: "-40px" }} expand="block">{item.name}</IonButton>
                         </IonCard>
-                        </CreateAnimation>
+                       
                        
                     )
                 })
             }
  
+           </IonList>
 
             {props.place.length <= 0 && <p>result not found... please check another category 😢</p>}
             <TourInfo location={tourData} isOpen={tourData != undefined} onDidDismiss={() => { settourData(undefined) }} />

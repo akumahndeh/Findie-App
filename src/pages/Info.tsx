@@ -111,6 +111,8 @@ const Info:React.FC<{user:any|userInterface}>=()=>{
        }else {
         Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
        }
+       HapticVibrate()
+
 })
 useIonViewWillEnter(() => {
     Plugins.StatusBar.setOverlaysWebView({
@@ -204,14 +206,7 @@ export async function notifyUser(title:string, body:string,url=``){
     })
 
     Plugins.LocalNotifications.addListener(`localNotificationReceived`,console.log)
-
-   
-   
-    let taskId= Plugins.BackgroundTask.beforeExit(()=>{
-          Plugins.Storage.remove({key:`notifs`})
-     })
-    
-     Plugins.BackgroundTask.finish({taskId})
+ 
 }
 
 export const InfoModal:React.FC<{currentInfo:infoInterface|undefined,onDidDismiss:Function|undefined}>=({currentInfo,onDidDismiss})=>{
@@ -295,4 +290,8 @@ export const InfoModal:React.FC<{currentInfo:infoInterface|undefined,onDidDismis
 export const openwithInAppBrowser=(url:string)=>{
 
      Plugins.Browser.open({url,toolbarColor:`#0d2c6d`}).catch(alert)
+}
+
+function HapticVibrate() {
+    throw new Error("Function not implemented.");
 }

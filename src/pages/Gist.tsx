@@ -53,6 +53,7 @@ const Gist: React.FC = () => {
     const [MyPost, setMyPost] = useState<PostInterface[]>([]);
     const refresherRef = useRef<HTMLIonRefresherElement>(null)
     const [networkToast, setnetworkToast] = useState({ message: ``, connected: true, color: `success` });
+     const [postsReady, setPostsReady]=useState(false)
     useEffect(() => {
 
         initialteGist()
@@ -169,8 +170,8 @@ const Gist: React.FC = () => {
                 setuser(user)
                 if (user) {
 
-                    keys.forEach((key, i) => {
-
+                    for (let i = 0 ; i < keys.length;i++)  {
+                         let key=keys[i]
                         if (i < index.final && i >= index.initial) {
                             database.ref(`gists/${user.faculty}`).child(key).once(`value`, snap => {
                                 let value = snap.val()
@@ -192,6 +193,9 @@ const Gist: React.FC = () => {
                                         if (i == 0) {
                                             notifyUser(`Gists are now available`, `find out what your friends in your faculty are talking about `)
                                         }
+                                       if(i==index.final-1){
+                                        setPostsReady(true)
+                                       }
                                     }
                                 }
                             })
@@ -201,7 +205,7 @@ const Gist: React.FC = () => {
                         }
 
 
-                    })
+                    }
                     setindex({ final: index.final + offset, initial: index.final })
                 }
 
@@ -315,7 +319,7 @@ const Gist: React.FC = () => {
                 <IonRefresher onIonRefresh={RefreshState} ref={refresherRef} slot={`fixed`}>
                     <IonRefresherContent></IonRefresherContent>
                 </IonRefresher>
-                <IonToolbar >
+                <IonList >
                     {/* <div style={{height:`100%`}} > */}
                     <IonPopover isOpen={currentUser ? true : false} onDidDismiss={() => { setcurrentUser(undefined) }}>
                         <IonImg onClick={() => { setviewImage(true) }} className={`popover-img`} src={currentUser?.image} />
@@ -344,7 +348,7 @@ const Gist: React.FC = () => {
                     }
 
                     {!NoPost ? <>{
-                        Posts.length > 0 ? Posts.map((post, index) => {
+                        Posts.length > 0 && postsReady ? Posts.map((post, index) => {
                             console.log(post?.images)
                             return <SocialCard localImg={false} viewImages={() => { viewImages(post, false) }} updatePost={updatePost} ReportPost={() => setcurrentPost(post)} sendAuthorInfo={viewAuthor} shareSocial={(url: string) => setcurrentImgUrl(url)} popopen={openComments} Posts={post} key={index} ></SocialCard>
                         }) : <><InitSkeleton></InitSkeleton><InitSkeleton></InitSkeleton><InitSkeleton></InitSkeleton></>
@@ -383,12 +387,10 @@ const Gist: React.FC = () => {
                             </IonToolbar>
                         </IonHeader>
                         <IonContent>
-
-
-                            {
+                          {
                                 currentImages.images.map((img, index) => (!currentImages.local) ? <ImageDownload key={index} image={img} sendUrl={() => { }} /> : <IonImg src={img} />)
                             }
-                            <IonToolbar>
+                            <IonList>
 
                                 <p className={`ion-padding`}>{Infopost?.message}</p>
                                 <p> {Infopost?.contact && <IonButton fill={`outline`} color={`dark`}>
@@ -397,7 +399,7 @@ const Gist: React.FC = () => {
                                 <p> {Infopost?.email && <IonButton fill={`outline`} color={`dark`}>
                                     email us
                                          </IonButton>}</p>
-                            </IonToolbar>
+                            </IonList>
                         </IonContent>
 
                     </IonModal>
@@ -405,7 +407,7 @@ const Gist: React.FC = () => {
                         <ModalContent posts={openReactions}></ModalContent>
                     </IonModal>
                     <FriendsModal isOpen={seefriends} onDidDismiss={() => { setseefriends(false) }}></FriendsModal>
-                </IonToolbar>
+                </IonList>
                 <IonToast buttons={[{ side: `start` }]}  cssClass={`network-toast`} position={`top`} mode={`ios`} onDidDismiss={() => setnetworkToast({ ...networkToast, message: `` })} duration={2600} isOpen={networkToast.message != ``} color={networkToast.color} message={networkToast.message} ></IonToast>
             </IonContent>
             {  <IonFab className={`option-fab`} horizontal="end" vertical="bottom">

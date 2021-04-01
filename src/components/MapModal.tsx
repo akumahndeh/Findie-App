@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from "react"
-import { IonModal, IonContent, IonImg, IonFabButton, IonFab, IonFabList, IonTitle, IonIcon, useIonViewDidLeave, IonToast, IonLabel, IonHeader, IonToolbar, IonList, IonItem, IonText, IonSlides, IonSlide, createGesture, useIonViewDidEnter, IonButton, IonPopover, IonCardContent, IonGrid, IonButtons, IonAlert, AlertButton, AlertInput, IonLoading, IonSpinner, CreateAnimation, IonToggle, IonListHeader, IonChip } from "@ionic/react"
+import { IonModal, IonContent, IonImg, IonFabButton, IonFab, IonFabList, IonTitle, IonIcon, useIonViewDidLeave, IonToast, IonLabel, IonHeader, IonToolbar, IonList, IonItem, IonText, createGesture, IonPopover, IonCardContent, IonAlert, AlertButton, AlertInput, IonLoading, IonSpinner, IonToggle, IonListHeader, IonChip } from "@ionic/react"
 
-import { close, menu, contract, resize, locate, barChart, pinOutline, caretForward, people, search, settings, call } from "ionicons/icons"
+import { close, menu, locate, barChart, pinOutline, people, search, settings, call } from "ionicons/icons"
 import "./MapModal.css"
 import { GeolocationPosition, HapticsImpactStyle, HapticsNotificationType, Plugins } from "@capacitor/core"
 import ViewPicture from "./ViewPicture"
-import ReactSpeedometer from "react-d3-speedometer";
-import { DownloadedImg } from "../pages/TourInfo"
-import { All, selectedPlaces } from "../media/images/images"
+import ReactSpeedometer from "react-d3-speedometer"; 
+import { selectedPlaces } from "../media/images/images"
 import firebase from "firebase"
 import { getStorage, notifyUser, userInterface } from "../pages/Info"
 import map from "../media/images/map.png"
@@ -667,9 +666,10 @@ function getAngle(val: number | undefined, min: number, max: number) {
 }
 
 export function HapticVibrate() {
-    Plugins.Haptics.vibrate()
+    try{Plugins.Haptics.vibrate()
     Plugins.Haptics.notification({ type: HapticsNotificationType.SUCCESS })
     Plugins.Haptics.impact({ style: HapticsImpactStyle.Heavy })
+}catch{}
 }
 
 function ActualLong(long: number | undefined, mapWidth: number) {
