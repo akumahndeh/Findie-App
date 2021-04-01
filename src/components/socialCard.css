@@ -21,10 +21,11 @@ body.dark form ion-button {
    margin-top: 10px;
    
  }
+ 
  .imageless-text ion-label a{
     text-decoration: underline;
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 11px;
     background-color: rgba(52, 101, 158, 0.726);
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
