@@ -69,12 +69,6 @@ const appPages: AppPage[] = [
   },
 
   {
-    title: 'about, help',
-    url: '/about',
-    iosIcon: informationOutline,
-    mdIcon: informationOutline
-  },
-  {
     title: 'feedback, contact',
     url: '/feedback',
     iosIcon: heart,
@@ -98,7 +92,7 @@ const Menu: React.FC = (props: any) => {
   const [showCreate, setshowCreate] = useState(false);
   const [darkmode, setdarkmode] = useState(false);
   const dispatch = useDispatch()
-  const history= useHistory()
+  const history = useHistory()
 
   function Toogle() {
     document.body.classList.toggle(`dark`)
@@ -117,19 +111,20 @@ const Menu: React.FC = (props: any) => {
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       if (!user) {
-         history.push(`/login`)
-         auth.signInAnonymously()
-      }else{
+        history.push(`/login`)
+        auth.signInAnonymously()
+      } else {
 
       }
     })
-   
+
     initializeUser()
   }, []);
 
 
   function initializeUser() {
     Plugins.Storage.get({ key: "user" }).then(data => {
+      console.log(`user---`, JSON.parse(data?.value || `{}`))
       if (data.value) {
         let value: userInterface = JSON.parse(data.value)
         dispatch(update_user(value))
@@ -156,6 +151,7 @@ const Menu: React.FC = (props: any) => {
     if (doc.data() && doc.exists) {
       const userdata: userInterface | any = doc.data()
       dispatch(update_user(userdata))
+      console.log(userdata, `---userdata---`)
       Plugins.Storage.set({ key: `user`, value: JSON.stringify(userdata) })
     }
   }
@@ -203,8 +199,12 @@ const Menu: React.FC = (props: any) => {
               <IonIcon slot="start" icon={starOutline} />
               <IonLabel className="ion-margin-top">Rate us</IonLabel>
             </IonItem>
-
-
+          </IonMenuToggle>
+          <IonMenuToggle autoHide={false}>
+            <IonItem href={`https://findieub.web.app`} target={`__blank`} detail >
+              <IonIcon slot="start" icon={starOutline} />
+              <IonLabel className="ion-margin-top">About us</IonLabel>
+            </IonItem>
           </IonMenuToggle>
           {MenuLinks.map((appPage, index) => {
             return (

@@ -55,7 +55,8 @@ const Login: React.FC = () => {
                     const user: userInterface | undefined | any = await getUserFromDB(uid)
                     if (user) {
                         await fstore.collection(`users`).doc(user.email).set(user)
-                        Storage.set({ key: `user`, value: JSON.stringify(user) })
+                        console.log(user)
+                        Plugins.Storage.set({ key: `user`, value: JSON.stringify(user) })
                         Storage.set({ key: "userid", value: user.email })
                         history.push(`/guide`)
                         dispatch(update_user(user))
@@ -71,6 +72,7 @@ const Login: React.FC = () => {
                 return;
             }
             const user: any = doc.data()
+            Plugins.Storage.set({ key: `user`, value: JSON.stringify(user) })
             dispatch(update_user(user))
             history.push(`/guide`)
 

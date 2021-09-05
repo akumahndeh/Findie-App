@@ -16,6 +16,7 @@ import { useSelector } from "react-redux"
 import { selectUser } from "../../state/user-state"
 import { storage } from "../../firebase/Firebase"
 import LetterAvatar from "../../components/letterAvatar"
+import { FindieImg } from "../../components/FindieImg"
 
 const { Modals } = Plugins
 const Profile: React.FC = () => {
@@ -155,7 +156,7 @@ const Profile: React.FC = () => {
                 <ViewPicture isOpen={imageView != undefined} description={`YOUR PROFILE PICTURE`} imageRef={imageView ? imageView : ``} OndidDismiss={() => setimageView(undefined)} />
             </IonContent>
             <IonPopover isOpen={popover} onDidDismiss={() => setpopover(false)} >
-                <img alt="" src={image} />
+                <FindieImg  className={``} style={{}}  src={image} />
             </IonPopover>
         </IonPage>
     )

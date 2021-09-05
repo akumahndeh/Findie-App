@@ -81,7 +81,7 @@ const About: React.FC = () => {
             <div className="four">
               The university of buea in your hands
                       <div className="icon">
-                <IonButton routerLink={`/login`}>
+                <IonButton routerLink={`/guide`}>
                   Go It
                         </IonButton>
               </div>

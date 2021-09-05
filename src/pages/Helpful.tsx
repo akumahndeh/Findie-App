@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { selectUser } from "../state/user-state";
 import MoreInfoModal from "../components/recommended/MoreInfoModal";
 import { fstore } from "../firebase/Firebase";
-import{ FindieImg} from "../components/FindieImg";
+import { FindieImg } from "../components/FindieImg";
 ;
 
 
@@ -43,7 +43,7 @@ const Recommended: React.FC = () => {
 
     useEffect(() => {
         setloading(true)
-
+        setnoData(false)
         fstore.collection(`recommended`).orderBy(`timestamp`).onSnapshot((snapshot => {
             const docs: any = snapshot.docs.map(doc => doc.data())
             setrecommendedData(docs)
@@ -51,13 +51,13 @@ const Recommended: React.FC = () => {
             if (docs.length <= 0) setnoData(true)
             else setnoData(false)
         }))
-        
-        
+
+
         fstore.collection(`recommended-analytics`).doc(user.faculty).collection(`available`).onSnapshot((snapshot => {
             const docs: any = snapshot.docs.map(doc => doc.data())
-            
+
             setloading(false)
-            if (docs.length <= 0){ 
+            if (docs.length <= 0) {
                 setnoData(true)
                 return
             }
@@ -100,12 +100,13 @@ const Recommended: React.FC = () => {
                             )
                         })
                     }
-                </IonToolbar>
-                {noData && <IonToolbar style={{ padding: `40px`, textALign: `center` }}>
-                    <IonText>
-                        NO RECOMMENDATIONS YET
+                    {noData && recommendedData.length <= 0 && <IonToolbar style={{ padding: `40px`, textAlign: `center` }} color={`none`} >
+                        <IonText>
+                            NO RECOMMENDATIONS YET
                 </IonText>
-                </IonToolbar>}
+                    </IonToolbar>}
+                </IonToolbar>
+
             </IonContent>
         </IonPage>
 
@@ -201,7 +202,7 @@ const RecommendedCard: React.FC<{ data: recommendDataInterface }> = ({ data: { i
     const [showMore, setshowMore] = useState(false)
     return (
         <IonCard onClick={() => setshowMore(true)}>
-            {images && images?.length > 0 && <FindieImg  style={{}} className={``} src={images[0]} />}
+            {images && images?.length > 0 && <FindieImg style={{}} className={``} src={images[0]} />}
             <IonCardContent>
                 <IonCardTitle>{title}</IonCardTitle>
 
