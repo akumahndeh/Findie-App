@@ -1,0 +1,42 @@
+.recommend ion-card>img{ 
+   max-height: 60vh;
+   width: 100%;
+   object-fit: cover;
+} 
+.recommend ion-card{
+    margin-bottom: 30px;
+}
+.contact-modal{
+ padding-top: 10vh;
+}
+
+.contact-modal ion-row ion-col ion-fab-button{
+    margin: auto;
+}
+.contact-modal .content-video{
+    margin-top: 30px;
+}
+.contact-modal .content-video iframe{
+    height:260px;
+    width: 100%;
+    border:none;
+    border-radius: 20px;
+}
+
+.contact-modal ion-slides{
+    max-height: 50vh;
+}
+
+.contact-modal{
+   --ion-background:transparent
+}
+
+.contact-modal ion-toolbar.contact-header{
+   border-radius: 20px 20px 0 0 ;
+}
+
+.contact-modal .close-fab{
+    transform: scale(0.6);
+    margin: 0px;
+
+}

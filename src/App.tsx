@@ -1,6 +1,6 @@
 import Menu from './components/Menu';
 import React, { useEffect, useState } from 'react';
-import { IonApp, IonBadge, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonSplitPane, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
+import { IonApp, IonBadge, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
 
@@ -22,83 +22,51 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
-import Main, { Header } from './pages/Main';
-import { Plugins, StatusBarStyle, Capacitor, PushNotification, PushNotificationToken } from '@capacitor/core';
-import Profile from './pages/MenuPages/Profile';
-import SignUp from './pages/SignUp';
+import { Header } from './pages/Main';
+import { Plugins, StatusBarStyle, PushNotification, PushNotificationToken } from '@capacitor/core';
 
-import Login from './pages/Login';
-import TourInfo from './pages/TourInfo';
-import Feedback from './pages/MenuPages/FeedBack';
-import GuideInfo from './pages/GuideInfo';
-import MyPost from './pages/MenuPages/MyPost';
-import Terms from './components/Terms';
-import GistEx from './pages/GistEx';
 import Guide, { authUser, authVisitor } from './pages/MenuPages/Guide';
-import TeacherAdmin from './pages/TeacherAdmin';
-import Teacher from './pages/Teachers';
-import TeacherHome from './pages/TeacherHome';
 import firebase from 'firebase';
-import About from './webonly/About';
 import Tour from './pages/Tour';
-import Gist from './pages/Gist';
-import Info, { getStorage, notifyUser, userInterface } from './pages/Info';
+import Info, { getStorage, userInterface } from './pages/Info';
 import './App.css';
 
 
-import { book, bookOutline, chatbox, chatboxOutline, information, informationOutline, search, searchOutline } from 'ionicons/icons';
-import { HapticVibrate } from './components/MapModal';
+import { book, chatbox, information, peopleCircleOutline, search } from 'ionicons/icons';
 import Home from './pages/Home';
+import Gist from './pages/Gist';
+import Terms from './components/Terms';
+import GistEx from './pages/GistEx';
+import Login from './pages/Login';
+import Feedback from './pages/MenuPages/FeedBack';
+import Profile from './pages/MenuPages/Profile';
+import SignUp from './pages/SignUp';
+import TeacherAdmin from './pages/TeacherAdmin';
+import TeacherHome from './pages/TeacherHome';
+import Teacher from './pages/Teachers';
+import About from './webonly/About';
+import { useSelector } from 'react-redux';
+import { selectUser } from './state/user-state';
+import Recommended from './pages/Helpful';
 
 
 
-var firebaseConfig = {
-  apiKey: "AIzaSyAjUdWh1UVBBVtUf9GVtBVb6CZT6c9epw4",
-  authDomain: "findieapp.firebaseapp.com",
-  databaseURL: "https://findieapp.firebaseio.com",
-  projectId: "findieapp",
-  storageBucket: "findieapp.appspot.com",
-  messagingSenderId: "932527026886",
-  appId: "1:932527026886:web:be0900678804038cdaddc7",
-  measurementId: "G-X6DYVWTFB5"
-};
+
 // Initialize Firebase
 
 const App: React.FC = () => {
-
-  if (firebase.apps.length <= 0) {
-    firebase.initializeApp(firebaseConfig)
-    firebase.analytics()
-  }
-  const [isAuth, setisAuth] = useState(true);
-  const [newgist, setnewgist] = useState(false);
+  const user: userInterface = useSelector(selectUser)
 
   useEffect(() => {
- 
+
     push()
     Plugins.StatusBar.show().catch(console.log)
     Plugins.StatusBar.setStyle({ style: StatusBarStyle.Dark }).catch(console.log)
-    // Plugins.SplashScreen.show({fadeInDuration:600,fadeOutDuration:700,showDuration:2000}).catch(console.log)
-    // if (Capacitor.isNative) {
-    //   Plugins.App.addListener(`backButton`, async () => {
-    //     if (window.location.pathname == `/tour`) {
-    //       let value = await Plugins.Modals.confirm({ message: `Are you sure you want to Exit App?`, title: `Exit`, })
-    //       if (value.value) {
-    //         Plugins.App.exitApp()
-    //       }
-    //     }
 
-    //   })
-
-    // }
-    authUser().catch(() => authVisitor().catch(err => {
-      Plugins.Toast.show({ text: err.message })
-
-    }))
 
 
     initializeTheme()
-    setOnlineStatus()
+
     async function push() {
 
       try {
@@ -129,113 +97,49 @@ const App: React.FC = () => {
   }, []);
 
 
-  async function setOnlineStatus(){
-    let onlineUsersRef= firebase.database().ref(`onlineUsers`)
-    let userid=(await getStorage(`userid`)).value
-    if(userid){
-    onlineUsersRef.child(userid).set(Date.now())
-    onlineUsersRef.child(userid).onDisconnect().remove()
-    }
-   }
-
-  useEffect(() => {
-    Plugins.Storage.get({ key: "user" }).then((user) => {
-      if (user.value) {
-        setisAuth(true)
-      } else {
-        setisAuth(false)
-        firebase.auth().signInAnonymously()
-
-      }
-
-
-    })
- 
-
-  }, []);
-
-  useEffect(() => {
-   
-    
-
-    getStorage(`lastgist`).then(async (res) => {
-      let value = res.value
-      let userval = ((await getStorage(`user`)).value)
-     
-      if (userval) {
-        let user: userInterface = JSON.parse(userval)
-        
-
-        firebase.database().ref(`/gistIndex`).child(user?.faculty).limitToLast(1).once(`value`, async(snapshot) => {
-          let val = snapshot.val()
-
-          if (val) {
-            let key = Object.keys(val)[0]
-            let senderInfoString=(await getStorage(val[key])).value
-            let message=`New photo on Findie📸 `+val[key], title=`New Gist`
-            let url=``
-            if(senderInfoString){
-              let senderInfo:userInterface=JSON.parse(senderInfoString)
-              url=senderInfo.image
-              title=senderInfo.firstName+` `+senderInfo.lastName
-                message=`📸 Posted a new Gist on Findie, check it out`
-            }
-            if (value) {
-              console.log(key,value,`key-value`)
-              if (key != value) {
-                notifyUser(title, message + ``,url)
-                setnewgist(true)
-              }
-            } else {
-              notifyUser(title, message + ``,url)
-              setnewgist(true)
-            }
-            console.log(key)
-            Plugins.Storage.set({ key: `lastgist`, value: JSON.stringify(key) }) 
-            
-          }
-
-
-          // firebase.database().ref(`/gistIndex`).child(user?.faculty).on(`child_added`, snapshot => {
-          //   let snapval = snapshot.val()
-          //   if (snapval) {
-          //     let key = Object.keys(snapval)[0]
-          //     let message = snapval[key]
-          //     notifyUser(`New Gist`, message + ``)
-          //     setnewgist(true)
-          //     Plugins.Storage.set({ key: `lastgist`, value: key })
-          //   }
+  async function setOnlineStatus() {
+    // let onlineUsersRef = firebase.database().ref(`onlineUsers`)
+    // let userid = (await getStorage(`userid`)).value
+    // if (userid) {
+    //   onlineUsersRef.child(userid).set(Date.now())
+    //   onlineUsersRef.child(userid).onDisconnect().remove()
+    // }
+  }
 
 
 
-          // })
-        })
-      }
-    })
-  }, []);
+  // useEffect(() => {
+
+
+
   return (
     <IonApp>
       <IonReactRouter>
         {/* <IonSplitPane contentId="main"> */}
-        <Menu  />
+        <Menu />
         {/* </IonSplitPane> */}
+        
         <IonTabs>
-          <IonRouterOutlet  mode={`md`} id="main">
+          <IonRouterOutlet mode={`md`} id="main">
             {/* <Route path="/Main" component={Main} exact /> */}
 
-            <Route exact path="/guide" render={() => <IonPage><Header title={`Guide`} user={{}} /><Guide /></IonPage>} />
-            <Route exact path="/tour" render={() => <Tour />} />
-            {/* <Route exact path="/gist" render={() => <IonPage><Header title={`Gist`} user={{}} />{isAuth ? <Gist /> : <Home />}</IonPage>} /> */}
-            <Route exact path="/info" render={() => <IonPage><Header title={`Info`} user={{}} />{isAuth ? <Info user={{}} /> : <Home />}</IonPage>} />
-            <Route exact path="/" render={() => <IonPage><Header title={`Guide`} user={{}} /><Guide /></IonPage>} />
-
+            <Route exact path="/guide" render={() => <IonPage><Header label={``} title={`Guide`} user={{}} /><Guide /></IonPage>} />
+            <Route exact path="/tour" component={Tour} />
+            {/* <Route exact path="/gist" render={() => <IonPage><Header label={`${getShortName(user?.faculty)}`} title={`Gist`} user={{}} />{isAuth ? <Gist /> : <Home />}</IonPage>} /> */}
+            {/* <Route exact path="/info" render={() => <IonPage><Header  label={``} title={`Info`} user={{}} />{user.email ? <Info user={{}} /> : <Home />}</IonPage>} /> */}
+            {/* <Route exact path="/info" render={() => <IonPage><Header label={``} title={`Info`} user={{}} /><Info /></IonPage>} /> */}
+            <Redirect exact from="/" to={`/about`} />
+            <Route path="/Profile" component={Profile} exact />
+            <Route path="/recommend" component={Recommended} exact />
+            <Route path="/feedback" component={Feedback} exact />
+            {/* <Route path="/terms" component={Terms} exact /> */}
+            {/* <Route path="/Teachers" component={Teacher} exact />
+            <Route path="/TeacherHome" component={TeacherHome} exact />
+            <Route path="/Teachers/admin" component={TeacherAdmin} exact /> */}
+            {/* <Route path={`/GistEx`} component={GistEx} /> */}
           </IonRouterOutlet>
 
-          <IonTabBar id={`tabbar`} selectedTab={`tour`}  color={`primary`} slot={`bottom`}>
-            {/* <IonTabButton style={{display:`none`}} href={`/tour`} tab={`tour`}>
-              <IonIcon icon={search} />
-              <IonLabel>Tour</IonLabel>
-            </IonTabButton> */}
+          <IonTabBar id={`tabbar`} color={`primary`} slot={`bottom`}>
             <IonTabButton href={`/guide`} tab={`guide`}>
               <IonIcon icon={book} />
               <IonLabel>Guide</IonLabel>
@@ -244,29 +148,17 @@ const App: React.FC = () => {
               <IonIcon icon={search} />
               <IonLabel>Tour</IonLabel>
             </IonTabButton>
-            {/* <IonTabButton href={`/gist`} tab={`gist`}>
-              <IonIcon onClick={() => { if (newgist) setnewgist(false) }} icon={chatbox} />
-              <IonLabel onClick={() => { if (newgist) setnewgist(false) }}>Gist</IonLabel>
-              {newgist && <IonBadge color={`danger`}></IonBadge>}
-            </IonTabButton> */}
-            <IonTabButton href={`/info`} tab={`info`}>
-              <IonIcon icon={information} />
-              <IonLabel>Info</IonLabel>
+            <IonTabButton href={`/recommend`} tab={`recommend`}>
+              <IonIcon icon={peopleCircleOutline} />
+              <IonLabel>helpful</IonLabel>
             </IonTabButton>
 
           </IonTabBar>
         </IonTabs>
-
-        <Route path="/Profile" component={Profile} exact />
-        <Route path="/signup" component={SignUp} exact />
-        <Route path="/feedback" component={Feedback} exact />
         <Route path="/about" component={About} exact />
         <Route path="/login" component={Login} exact />
-        <Route path="/terms" component={Terms} exact />
-        <Route path="/Teachers" component={Teacher} exact />
-        <Route path="/TeacherHome" component={TeacherHome} exact />
-        <Route path="/Teachers/admin" component={TeacherAdmin} exact />
-        <Route path={`/GistEx`} component={GistEx} />
+        <Route path="/signup" component={SignUp} exact />
+
 
       </IonReactRouter>
 
@@ -280,14 +172,16 @@ export default App;
 export const HideTab = (value = true) => {
   let tab = document.getElementById(`tabbar`)
   if (tab) {
-    if (value)
-      tab.style.setProperty(`display`, `none`)
-    else {
-      tab.style.setProperty(`display`, `flex`)
+    if (value) {
+      tab.style.setProperty(`visibility`, `hidden`)
 
+    } else {
+
+      tab.style.setProperty(`visibility`, `visible`)
     }
   }
 }
+
 
 export async function initializeTheme() {
   let theme = await getStorage(`dark`)
@@ -302,23 +196,23 @@ export async function initializeTheme() {
   }
 
 
-
 }
 
-//<Linkify>See examples at tasti.github.io/react-linkify/.</Linkify>
 
-// if (val) {
-        //   let key = Object.keys(val)[0]
-        //   let message = val[key]
-        //   if (value) {
+function getShortName(text: string | undefined) {
 
-        //     if (key != value) {
-        //       notifyUser(`New Gist`, message + ``)
-        //       setnewgist(true)
-        //     }
-        //   } else {
-        //     notifyUser(`New Gist`, message + ``)
-        //     setnewgist(true)
-        //   }
-        //   Plugins.Storage.set({key:`lastgist`,value:key})
-        // }
+  switch (text) {
+    case `A.S.T.I`: return text;
+    case `College Of Technology`: return `C.O.T`;
+    case `Agriculture and Vertinary medicine`: return `F.A.V.M`;
+    case `Arts`: return `Arts`;
+    case `engineering and technology`: return `F.E.T`;
+    case `Faculty of Education`: return `Education`;
+    case `Health Science`: return `F.H.S`;
+    case `Social Management Science S.M.S`: return `S.M.S`;
+    case `Science`: return `Science`;
+    case `H.T.T.T.C`: return `H.T.T.T.C`;
+    case `Law and Political Sciences`: return `L.P.S`
+    default: return ``
+  }
+}

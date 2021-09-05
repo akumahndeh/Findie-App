@@ -4,7 +4,7 @@ import firebase from 'firebase';
 import { shareSocialSharp, download, trash, heart, arrowBack, chevronDown } from 'ionicons/icons';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePopover, ImageDownload, SocialCard } from '../../components/SocialCard';
+// import { AnimatePopover, ImageDownload, SocialCard } from '../../components/SocialCard';
 import { Appshare, Download, InitSkeleton, PostInterface } from '../Gist';
 import { getStorage, userInterface } from '../Info';
 import  '../Gist.css'
@@ -129,7 +129,7 @@ const MyPost: React.FC = () => {
                 <div style={{backgroundColor:`#f4f5f8`,minHeight:`100vh`}}>
                 <IonHeader>
                
-               <IonToolbar >
+               {/* <IonToolbar >
                  <IonItem color={`none`} lines={`none`}>
                  <Link to={`/Profile`}>  <IonAvatar style={{width:`40px`,height:`40px`,marginLeft:`8px`}} slot={`start`}>
                        <IonImg src={user?.image} />
@@ -138,25 +138,25 @@ const MyPost: React.FC = () => {
                        {`${user?.firstName} ${user?.lastName}`}
                    </IonTitle>
                  </IonItem>
-               </IonToolbar>
+               </IonToolbar> */}
            </IonHeader>
-                <IonLoading isOpen={loading} onDidDismiss={stopload} message={`deleting`} spinner={`lines`}></IonLoading>
+                {/* <IonLoading isOpen={loading} onDidDismiss={stopload} message={`deleting`} spinner={`lines`}></IonLoading>
                 {!noPost && <>{
                     Object.keys(verifyObject(Posts)).length > 0 ? Object.keys(verifyObject(Posts)).map((key: any, index) => {
                                            if (  verifyObject(JSON.parse(Posts[key])).userid!==userid) return;
-                        return (<div key={index}><SocialCard localImg={false} viewImages={()=>{viewImages(JSON.parse(Posts[key])) }} ReportPost={()=>{ setReactions(Posts[key])}} updatePost={updatePost} sendAuthorInfo={() => { }} Posts={JSON.parse(Posts[key])} popopen={openComments} shareSocial={(url: string) => { setcurrentImgUrl(url); setcurrentKey(key) }} /></div>)
+                        return (<div key={index}><SocialCard localImg={false} viewImages={()=>{viewImages(JSON.parse(Posts[key])) }}  updatePost={updatePost} sendAuthorInfo={() => { }} Posts={JSON.parse(Posts[key])} popopen={openComments}  /></div>)
                     }) : <InitSkeleton></InitSkeleton>
                 }
                 </>}{
                     noPost && <p className="ion-padding">
                         <IonCardTitle>No post yet</IonCardTitle>
                     </p>
-                }
+                } */}
                 
-                <AnimatePopover play={play} stop={stop} comments={comments} ondidDismiss={() => {
+                {/* <AnimatePopover play={play} stop={stop} comments={comments} ondidDismiss={() => {
                     setstop(true);
                     setplay(false)
-                }}></AnimatePopover>
+                }}></AnimatePopover> */}
                 <IonActionSheet translucent mode={`ios`} isOpen={currentImgUrl != ``} onDidDismiss={() => setcurrentImgUrl(``)}
                     buttons={[{ text: `reactions`, icon: heart, handler: () => viewReactions() },{ text: `share`, icon: shareSocialSharp, handler: () => Appshare(currentImgUrl) },
                     { text: `download`, icon: download, handler: () => Download(btnRef,currentImgUrl) }
@@ -175,12 +175,12 @@ const MyPost: React.FC = () => {
                                 <IonTitle>view images</IonTitle>
                             </IonToolbar>
                         </IonHeader>
-                        <IonContent>
+                        {/* <IonContent>
                     
                             {
                                 currentImages.map((img, index) => <ImageDownload key={index} image={img} sendUrl={() => { }} />)
                             }
-                        </IonContent>
+                        </IonContent> */}
                         
                     </IonModal>
                <IonModal mode={`ios`} swipeToClose isOpen={seeLikes} onDidDismiss={()=>{setseeLikes(false)}}>
@@ -294,16 +294,16 @@ export  const DisplayReactionItem:React.FC<{person:userInterface}>=({person})=>{
         <IonAvatar>
             <IonImg src={person?.image}></IonImg>
         </IonAvatar>
-        <IonLabel style={{textTransform:`capitalize`,marginLeft:`14px`}}>
+        {/* <IonLabel style={{textTransform:`capitalize`,marginLeft:`14px`}}>
             {person?.firstName+` `+person?.lastName}
-        </IonLabel>
+        </IonLabel> */}
         <IonButton onClick={showMore} fill={`clear`}  slot={`end`}>
         <IonIcon style={{transition:`0.4s`,...more?{transform:`rotate(180deg)`}:{}}} icon={chevronDown}></IonIcon>
         </IonButton>
        
     </IonItem>
     <div style={{transition:`0.4s`,...more?{transform:`translateY(10px)`}:{height:`0.001px`,opacity:0}}}>
-        <IonItem>
+        {/* <IonItem>
             {person.faculty}
         </IonItem>
         <IonItem>
@@ -317,7 +317,7 @@ export  const DisplayReactionItem:React.FC<{person:userInterface}>=({person})=>{
         </IonItem>
         <IonItem lines={`none`}>
            
-        </IonItem>
+        </IonItem> */}
     </div>
     </div>
     )

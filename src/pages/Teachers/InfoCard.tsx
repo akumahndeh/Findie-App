@@ -1,13 +1,14 @@
+import React, { useState, useEffect } from "react"; 
 import { Plugins } from "@capacitor/core";
 import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonText, IonNote, IonButtons, IonButton, IonIcon, IonRow, IonLabel, IonProgressBar } from "@ionic/react";
-import firebase from "firebase";
 import { arrowForward } from "ionicons/icons";
-import React, { useState, useEffect } from "react"; 
 import HtmlParser from "react-html-parser";
 import { getStorage } from "../Info";
 import { ContentInterface, filesInterface, fileImages } from "./AddModal";
+import firebase from "../../firebase/Firebase";;
 
-export const InfoCard: React.FC<{ info: { Content: ContentInterface, queuedFiles: filesInterface[] }, authTeacher: firebase.User | null }> = ({ authTeacher, info }) => {
+
+export const InfoCard: React.FC<{ info: { Content: ContentInterface, queuedFiles: filesInterface[] }, authTeacher: firebase.User | null |any }> = ({ authTeacher, info }) => {
     const [progress, setprogress] = useState<number[]>([]);
 
     const successFullUpload = () => {

@@ -2,7 +2,7 @@ import React, {  } from "react"
 import { IonCard, IonCardContent, IonItem, IonTextarea, IonButton, IonInput } from "@ionic/react"
 import { Plugins } from "@capacitor/core"
 import "../components/GistModal.css"
-import firebase from "firebase";
+import firebase from "../firebase/Firebase";;
 
 const GistEx: React.FC = () => {
      function submitGuide(event:any ){

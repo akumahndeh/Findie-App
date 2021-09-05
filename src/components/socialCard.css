@@ -79,7 +79,7 @@ body.dark form ion-button {
   display: block; 
 }
 .img-container ion-slides ion-slide ion-img,.img-container ion-slides ion-slide img{
- height: 60vh;
+
   object-fit: contain;
   
 }
@@ -96,9 +96,19 @@ body.dark .img-container ion-slides{
 }
 .image-download{
   background-size: contain;
+  background-color:  var(--ion-color-light);
+  height: 60vh;
+}
+.image-download ion-img{
+  height:60vh;
+  object-fit: cover; 
+}
+.post-img.one{
+  max-height: 60vh;
+  min-height: 34vh;
 }
 .image-download ion-img,.image-download img{
-  backdrop-filter: blur(20px);
+   
   
  
 

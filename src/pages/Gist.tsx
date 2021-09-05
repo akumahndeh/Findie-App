@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useState } from "react"
-import { IonFab, IonFabButton, IonIcon, IonGrid, IonCol, IonRow, IonSkeletonText, IonContent, IonInfiniteScroll, IonInfiniteScrollContent, IonActionSheet, IonPopover, IonImg, IonList, IonItem, IonLabel, IonButton, IonModal, IonToolbar, IonTitle, IonHeader, IonBackdrop, IonRefresher, IonRefresherContent, useIonViewDidEnter, useIonViewWillEnter, IonToast, IonAvatar, IonBadge, IonTabButton, IonInput } from "@ionic/react"
-import { add, arrowBack, download, heart, shareSocialSharp, thumbsDown, trashBin } from "ionicons/icons";
+import { IonFab, IonFabButton, IonIcon, IonGrid, IonCol, IonRow, IonSkeletonText, IonContent, IonInfiniteScroll, IonInfiniteScrollContent, IonActionSheet, IonPopover, IonImg, IonList, IonItem, IonLabel, IonButton, IonModal, IonToolbar, IonTitle, IonHeader, IonBackdrop, IonRefresher, IonRefresherContent, useIonViewDidEnter, useIonViewWillEnter, IonToast, IonAvatar, IonBadge, IonTabButton, IonInput, IonCard, IonCardContent, IonSpinner, IonCardHeader, IonButtons, IonLoading, useIonViewWillLeave, useIonViewDidLeave } from "@ionic/react"
+import { add, arrowBack, close, download, heart, shareSocialSharp, trashBin } from "ionicons/icons";
 import "./Gist.css"
-import { AnimatePopover, ImageDownload, SocialCard } from "../components/SocialCard";
+// import { AnimatePopover, ImageDownload, SocialCard } from "../components/SocialCard";
 import firebase, { storage } from "firebase";
 import { FilesystemDirectory, NetworkStatus, Plugins } from "@capacitor/core";
-import { getStorage, notifyUser, userInterface } from "./Info";
-import ViewPicture from "../components/ViewPicture";
+import { getStorage, userInterface } from "./Info";
 import CreateGist from "../components/GistModal";
-import { ModalContent } from "./MenuPages/MyPost";
 import FriendsModal from "./FriendsModal";
 
 export interface PostInterface {
@@ -32,74 +30,56 @@ const Gist: React.FC = () => {
     const [comments, setcomments] = useState<any>();
     const [user, setuser] = useState<userInterface>();
     const [userid] = useState<string>();
-    const [PostObj, setPostObj] = useState<any>();
     const [Posts, setPosts] = useState<PostInterface[]>([]);
-    const [disableInfinite, setdisableInfinite] = useState(!true);
-    const [currentImgUrl, setcurrentImgUrl] = useState(``);
-    const atag = useRef<HTMLAnchorElement>(null)
-     const [currentUser, setcurrentUser] = useState<userInterface>();
-    const [currentPost, setcurrentPost] = useState<PostInterface>();
+    const [disableInfinite, setdisableInfinite] = useState(true);
+      const [currentUser, setcurrentUser] = useState<userInterface>();
     const [currentImages, setcurrentImages] = useState<{ local: boolean, images: any[] }>({ local: false, images: [] });
-    let btnRef = useRef<HTMLIonButtonElement>(null)
-    const [NoPost, setNoPost] = useState(false);
+     const [NoPost, setNoPost] = useState(false);
     const [viewImage, setviewImage] = useState(false);
     const [createAgist, setcreateAgist] = useState(false);
-    const [openReactions, setopenReactions] = useState<PostInterface | undefined>();
-    const offset = 20
     const [seefriends, setseefriends] = useState(false);
     /**loading data sequencially to database */
-    const [index, setindex] = useState({ initial: 0, final: offset });
-    const [PostKeys, setPostKeys] = useState<string[]>([]);
     const [MyPost, setMyPost] = useState<PostInterface[]>([]);
-    const refresherRef = useRef<HTMLIonRefresherElement>(null)
     const [networkToast, setnetworkToast] = useState({ message: ``, connected: true, color: `success` });
-     const [postsReady, setPostsReady]=useState(false)
-    useEffect(() => {
+    const [postsReady, setPostsReady] = useState(false)
+    const [changePage, setchangePage] = useState(false)
+    const [displayContent, setdisplayContent] = useState(!true)
+    
+  
+    async function initRequest() {
 
-        initialteGist()
-        Plugins.Network.getStatus().then(res => {
-            if (!res.connected)
-                IndicateNetChange(res)
-        })
-        Plugins.Network.addListener(`networkStatusChange`, status => {
-            console.log(`status changed`)
-            IndicateNetChange(status)
+        let userval = ((await getStorage(`user`)).value)
+       
+        if (userval) {
 
-        })
-
-    }, []);
-
-    async function initialteGist() {
-        let storedGist = (await getStorage(`gistIndex`)).value
-        let userstring = (await getStorage(`user`)).value
-        if (storedGist && userstring) {
-            let storedArray: string[] = JSON.parse(storedGist)
-            let user: userInterface = JSON.parse(userstring)
-            database.ref().child(`gistIndex/${user?.faculty}`).limitToLast(1).once(`value`, (snapshot) => {
-                let value = snapshot.val()
-                if (value) {
-                    let key = Object.keys(value)[0]
-                    if (key == storedArray[0]) {
-                        setPostKeys(storedArray)
-                        let temp: any = {}
-
-                        storedArray.forEach((key) => {
-                            temp[key] = null
-
-                        })
-                        setPostObj(temp)
-                        let init = true
-                        getPosts(storedArray, temp, init)
-                        setdisableInfinite(false)
-                    } else {
-                        InitialDatabaseFetch()
+            let user: userInterface = JSON.parse(userval)
+            setuser(user)
+            const offset = 6
+            firebase.database().ref(`/FindieGists`).child(user?.faculty).orderByKey().limitToLast(offset).on(`value`, async (snapshot) => {
+                let val = snapshot.val()
+                if (val) {
+                    let poststemp: PostInterface[] = Object.keys(val).map(key => ({ id: key, ...JSON.parse(val[key]) })).reverse()
+                    if (Posts.length > 0 && poststemp.length > 0) {
+                        if (poststemp[0].id !== Posts[0].id) {
+                            setPosts([])
+                        }
                     }
-                }
-            })
-        } else {
-            InitialDatabaseFetch()
-        }
+                      
+                    setPosts([...poststemp])
+                   Plugins.Storage.set({ key: `Posts`, value: JSON.stringify(poststemp) })
 
+                    if (offset > poststemp.length) {
+                        setdisableInfinite(true)
+                    }
+
+                } else {
+                    setPosts([])
+                    setNoPost(true)
+                }
+                setPostsReady(true)
+
+            })
+        }
     }
 
     function IndicateNetChange(status: NetworkStatus) {
@@ -109,8 +89,8 @@ const Gist: React.FC = () => {
             message = `Back online`
             color = `dark`
             connected = true
-            if(userid)
-            database.ref(`onlineUsers`).child(userid).set(Date.now())
+            if (userid)
+                database.ref(`onlineUsers`).child(userid).set(Date.now())
         }
         else {
             message = `Not connected`
@@ -122,108 +102,55 @@ const Gist: React.FC = () => {
         setnetworkToast({ message, color, connected })
     }
 
-    const getReactions = (post: PostInterface | undefined) => {
-        setopenReactions(post)
-    }
 
 
-    async function InitialDatabaseFetch() {
-        try {
-            Plugins.Storage.get({ key: `user` }).then((res) => {
-                let user: userInterface = JSON.parse(res.value + ``)
-                setuser(user)
-                if (user) {
-                    database.ref().child(`gistIndex/${user?.faculty}`).once(`value`, (snapshot) => {
-                        let value = snapshot.val()
-                        if (value) {
-                            let keys: string[] = Object.keys(value).reverse()
-                            Plugins.Storage.set({ key: `gistIndex`, value: JSON.stringify(keys) })
-                            setPostKeys(keys)
-                            let temp: any = {}
 
-                            keys.forEach((key) => {
-                                temp[key] = null
-
-                            })
-                            setPostObj(temp)
-                            let init = true
-                            getPosts(keys, temp, init)
-                            setdisableInfinite(false)
-
-                        }
-                        else {
-                            setNoPost(true)
-                        }
-                    })
-                }
-            })
-        } catch { }
-    }
-
-
-    async function getPosts(keys: string[], PostObj: any, init = false) {
-        let initial = init
-        try {
-            let tempObj: any = PostObj
-            Plugins.Storage.get({ key: `user` }).then((res) => {
-                let user: userInterface = JSON.parse(res.value + ``)
-                setuser(user)
-                if (user) {
-
-                    for (let i = 0 ; i < keys.length;i++)  {
-                         let key=keys[i]
-                        if (i < index.final && i >= index.initial) {
-                            database.ref(`gists/${user.faculty}`).child(key).once(`value`, snap => {
-                                let value = snap.val()
-                                if (initial) {
-                                    setPosts([])
-                                    initial = false
-                                }
-
-
-                                if (value) {
-                                    if (snap.key) {
-                                        tempObj[snap.key] = JSON.parse(value)
-                                        setPostObj(tempObj)
-                                        let tempArray: any = Object.keys(tempObj).filter(key => tempObj[key] != null).map((key) => {
-                                            ; return { id: key, ...tempObj[key] }
-                                        })
-                                        setPosts([...tempArray])
-                                        refresherRef.current?.complete()
-                                        if (i == 0) {
-                                            notifyUser(`Gists are now available`, `find out what your friends in your faculty are talking about `)
-                                        }
-                                       if(i==index.final-1){
-                                        setPostsReady(true)
-                                       }
-                                    }
-                                }
-                            })
-                            if (i == keys.length - 1) {
-                                setdisableInfinite(true)
-                            }
-                        }
-
-
-                    }
-                    setindex({ final: index.final + offset, initial: index.final })
-                }
-
-            })
-        } catch { }
-    }
 
     function onInfinite() {
-        getPosts(PostKeys, PostObj)
+        // getPosts(PostKeys, PostObj)
+        const offset = 10
+        if (user && Posts) {
+            firebase.database().ref(`/FindieGists`).child(user?.faculty).orderByKey().endAt(Posts[Posts.length - 1].id).limitToLast(offset).on(`value`, async (snapshot) => {
+                let val = snapshot.val()
+                if (val) {
+                    let poststemp: PostInterface[] = Object.keys(val).filter(key => key != Posts[Posts.length - 1].id).map(key => ({ id: key, ...JSON.parse(val[key]) })).reverse()
+                    setPosts([...Posts, ...poststemp])
+                    setPostsReady(true)
+                    if (offset > poststemp.length) {
+                        setdisableInfinite(true)
+                    }
+
+                }
+
+            })
+        } else {
+            setdisableInfinite(true)
+        }
     }
     // 
 
 
-    function RefreshState() {
-        setindex({ final: 0, initial: 0 })
-        setindex({ final: 0, initial: 0 })
-        InitialDatabaseFetch()
-    }
+useIonViewDidEnter(()=>{
+       async function init(){
+            let localpost = (await getStorage(`Posts`)).value
+            if (localpost && Posts.length<=0) {
+               setPosts([...JSON.parse(localpost)])
+               window.setTimeout(()=>{
+                initRequest()
+            },1000)
+            Plugins.Network.getStatus().then(res => {
+                if (!res.connected)
+                    IndicateNetChange(res)
+            })
+            Plugins.Network.addListener(`networkStatusChange`, status => {
+                console.log(`status changed`)
+                IndicateNetChange(status)
+    
+            })
+           }
+        }
+        init()
+})
     function viewAuthor(author: userInterface) {
         setcurrentUser(author)
     }
@@ -245,7 +172,7 @@ const Gist: React.FC = () => {
             return
         }
         if (user && newPost) {
-            database.ref(`gists/${user.faculty}/`).child(newPost.id).set(JSON.stringify(newPost))
+
             setPosts(Posts.map((p) => {
                 if (p.id == newPost.id) {
                     return newPost
@@ -254,39 +181,35 @@ const Gist: React.FC = () => {
             }))
         }
 
-  }
-
-  function DeletePost(){
-   if(user){
-    database.ref(`gists/${user?.faculty}`).child(`${currentPost?.id}`).remove( )
-    let images:string[]=  Object.values(currentPost?.images) 
-    for(let i=0; i<images.length;i++){
-        storage().ref(images[i]).delete().then(()=>{
-            if(i===images.length-1){
-                Plugins.Toast.show({text:`Deleted Post`})
-            }
-        })
     }
 
-   }
-
-}
     let Infopost: PostInterface | undefined;
     function viewImages(post: PostInterface, local: boolean) {
         if (post.images)
             setcurrentImages({ local, images: Object.values(post.images) })
     }
     useIonViewDidEnter(() => {
-        if (document.body.classList.contains(`dark`)) {
-            Plugins.StatusBar.setBackgroundColor({ color: `#152b4d` }).catch(console.log)
-        } else {
-            Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
-        }
+        // if (document.body.classList.contains(`dark`)) {
+        //     Plugins.StatusBar.setBackgroundColor({ color: `#152b4d` }).catch(console.log)
+        // } else {
+        //     Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
+        // }
     })
+    useIonViewDidLeave(()=>{
+        setchangePage(true)
+        // setdisplayContent(false)
+    })
+    useIonViewDidLeave(()=>{
+        setchangePage(false)
+    })
+
     useIonViewWillEnter(() => {
-        Plugins.StatusBar.setOverlaysWebView({
-            overlay: false
-        }).catch(() => { });
+        // Plugins.StatusBar.setOverlaysWebView({
+        //     overlay: false
+        // }).catch(() => { });
+    })
+    useIonViewDidEnter(()=>{
+        setdisplayContent(true)
     })
     function jobDone(value: { id: string, done: boolean }) {
         // console.log(value)
@@ -303,56 +226,83 @@ const Gist: React.FC = () => {
         // setMyPost(postss)
     }
     useEffect(() => {
-         console.log(MyPost)
+        console.log(MyPost)
     }, [MyPost]);
-    const [text, settext] = useState(``);
+    useEffect(() => {
+        if (postsReady) {
+            setdisableInfinite(false)
+        }
+    }, [postsReady]);
+   
+    useEffect(() => {
+        if (Posts?.length>0) {
+            // Plugins.Storage.set({ key: `Posts`, value: JSON.stringify(Posts) })
+          }
+        
+    }, [Posts]);
 
     const [play, setplay] = useState(false);
     const [stop, setstop] = useState(false);
     return (
         <>
-            <IonContent className={`gist`}>
-                {/* <IonItem>
-                    <IonInput onIonChange={(e)=>settext(e.detail.value+``)}></IonInput>
-                    <IonButton onClick={()=>jobDone({id:text,done:true})} ></IonButton>
-                </IonItem> */}
-                <IonRefresher onIonRefresh={RefreshState} ref={refresherRef} slot={`fixed`}>
-                    <IonRefresherContent></IonRefresherContent>
-                </IonRefresher>
-                <IonList >
-                    {/* <div style={{height:`100%`}} > */}
-                    <IonPopover isOpen={currentUser ? true : false} onDidDismiss={() => { setcurrentUser(undefined) }}>
-                        <IonImg onClick={() => { setviewImage(true) }} className={`popover-img`} src={currentUser?.image} />
-                        <IonContent>
-                            <IonList style={{ height: `100px`, overflow: `scroll` }}>
-                                <IonItem><IonLabel>{`${currentUser?.firstName} ${currentUser?.lastName}`}</IonLabel></IonItem>
-                                <IonItem><IonLabel>{currentUser?.faculty}</IonLabel></IonItem>
-                                <IonItem><IonLabel>{currentUser?.department}</IonLabel></IonItem>
-                                <IonItem><IonLabel>{currentUser?.email}</IonLabel></IonItem>
-                                <IonItem><IonLabel>{currentUser?.proff}</IonLabel></IonItem>
-                            </IonList>
-                        </IonContent>
-                    </IonPopover>
-                    <div className="imageless-text">
+            {!postsReady && <IonFab style={{ transform: `scale(0.8) translateY(30px)` }} vertical={`top`} horizontal={`center`}>
+                <IonFabButton color={`light`}>
+                    <div className="ion-padding-horizontal">
+                        <IonSpinner color={`danger`}></IonSpinner>
                     </div>
-                    <ViewPicture description={currentPost?.message ? currentPost?.message : ``} isOpen={viewImage} OndidDismiss={() => setviewImage(false)} imageRef={currentUser?.image + ``}></ViewPicture>
-                    <a href={currentImgUrl} ref={atag} download></a>
-                    <AnimatePopover play={play} stop={stop} comments={comments} ondidDismiss={() => {
-                        setstop(true);
-                        setplay(false)
-                    }}></AnimatePopover>
-                    {
-                        MyPost.length > 0 && MyPost.map((post, index) => {
-                            return <SocialCard localImg={true} viewImages={() => { viewImages(post, true) }} updatePost={(post) => updatePost(post, true)} ReportPost={() => setcurrentPost(post)} sendAuthorInfo={viewAuthor} shareSocial={(url: string) => setcurrentImgUrl(url)} popopen={openComments} Posts={post} key={index} ></SocialCard>
-                        })
-                    }
+                </IonFabButton>
+            </IonFab>
+            }
+            {/* <IonContent className={`gist`}>
+            <IonLoading isOpen={changePage} onDidDismiss={()=>setchangePage(false)} ></IonLoading>
 
-                    {!NoPost ? <>{
-                        Posts.length > 0 && postsReady ? Posts.map((post, index) => {
-                            console.log(post?.images)
-                            return <SocialCard localImg={false} viewImages={() => { viewImages(post, false) }} updatePost={updatePost} ReportPost={() => setcurrentPost(post)} sendAuthorInfo={viewAuthor} shareSocial={(url: string) => setcurrentImgUrl(url)} popopen={openComments} Posts={post} key={index} ></SocialCard>
-                        }) : <><InitSkeleton></InitSkeleton><InitSkeleton></InitSkeleton><InitSkeleton></InitSkeleton></>
-                    }</> : <>
+
+                <IonList >
+                    <IonToolbar color={`light`}>
+                        <IonModal cssClass={`mates-profile`} isOpen={currentUser ? true : false} onDidDismiss={() => { setcurrentUser(undefined) }}>
+                            <IonContent>
+                                <IonToolbar>
+                                    <IonTitle color={`light`}>User Info</IonTitle>
+                                    <IonButtons slot={`end`}>
+                                        <IonButton color={`light`}>
+                                            <IonBackdrop></IonBackdrop>
+                                            <IonIcon icon={close} />
+                                        </IonButton>
+                                    </IonButtons>
+
+                                </IonToolbar>
+                                <div className="header-img-con">
+                                    <IonImg onClick={() => { setviewImage(true) }} className={`popover-img`} src={currentUser?.image} />
+                                </div>
+                                <IonList>
+                                    <IonItem><IonLabel>{`${currentUser?.firstName} ${currentUser?.lastName}`}</IonLabel></IonItem>
+                                    <IonItem><IonLabel>{currentUser?.faculty}</IonLabel></IonItem>
+                                    <IonItem><IonLabel>{currentUser?.department}</IonLabel></IonItem>
+                                    <IonItem><IonLabel>{currentUser?.email}</IonLabel></IonItem>
+                                    <IonItem><IonLabel>{currentUser?.proff}</IonLabel></IonItem>
+                                </IonList>
+                            </IonContent>
+                        </IonModal >
+                        <div className="imageless-text">
+                        </div>
+
+                        <AnimatePopover play={play} stop={stop} comments={comments} ondidDismiss={() => {
+                            setstop(true);
+                            setplay(false)
+                        }}></AnimatePopover>
+                     {
+                            MyPost.length > 0 && MyPost.map((post, index) => {
+                                return <SocialCard localImg={true} viewImages={() => { viewImages(post, true) }} updatePost={(post) => updatePost(post, true)} sendAuthorInfo={viewAuthor} popopen={openComments} Posts={post} key={index} ></SocialCard>
+                            })
+                        }
+
+                        {!NoPost ? <>{
+                            Posts.length > 0 ? Posts.map((post, index) => {
+                                
+
+                                return <SocialCard localImg={false} viewImages={() => { viewImages(post, false) }} updatePost={updatePost} sendAuthorInfo={viewAuthor} popopen={openComments} Posts={post} key={index} ></SocialCard>
+                            }) : <><InitSkeleton></InitSkeleton><InitSkeleton></InitSkeleton><InitSkeleton></InitSkeleton></>
+                        }</> : <>
                             <div className="no-post-con">
                                 <img alt={``} className={`no-post two`} style={{ width: `100%` }} src={`https://images.unsplash.com/photo-1545291730-faff8ca1d4b0?ixid=MXwxMjA3fDB8MHxzZWFyY2h8MzV8fGZhc2hpb258ZW58MHx8MHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60`} />
 
@@ -365,72 +315,55 @@ const Gist: React.FC = () => {
                         </>}
 
 
-                    <CreateGist jobDone={jobDone} openModal={createAgist} closeModal={(gist: PostInterface) => { if (gist) { setMyPost([...MyPost, gist]) }; setcreateAgist(false) }}></CreateGist>
+                      
+                        <CreateGist jobDone={jobDone} openModal={createAgist} closeModal={(gist: PostInterface) => { if (gist) { setMyPost([...MyPost, gist]) }; setcreateAgist(false) }}></CreateGist>
 
-                    {Posts.length > 0 && <IonInfiniteScroll color={`danger`} onIonInfinite={onInfinite} disabled={disableInfinite}>
-                        <IonInfiniteScrollContent></IonInfiniteScrollContent>
-                    </IonInfiniteScroll>}
-                    <IonActionSheet translucent isOpen={currentImgUrl != ``} onDidDismiss={() => setcurrentImgUrl(``)}
-                        buttons={[{ text: `share`, icon: shareSocialSharp, handler: () => Appshare(currentImgUrl) },
-                        { text: `Reactions`, icon: heart, handler: () => getReactions(currentPost) },
-                        { text: `download`, icon: download, handler: () => Download(btnRef, currentPost?.images[`0`]) }, { text: `report`, icon: thumbsDown, handler: () => ReportPost(currentPost, userid) },currentPost?.userid ==userid?{text:`Delete`, icon:trashBin, handler:DeletePost}:{}]} ></IonActionSheet>
+                        {Posts.length > 0 && !disableInfinite && <IonInfiniteScroll color={`danger`} onIonInfinite={onInfinite} disabled={disableInfinite}>
+                            <IonInfiniteScrollContent></IonInfiniteScrollContent>
+                        </IonInfiniteScroll>}
 
-                    <IonButton style={{ display: `none` }} download={currentImgUrl} ref={btnRef}></IonButton>
-                    <IonModal isOpen={currentImages.images.length > 0} onDidDismiss={() => setcurrentImages({ local: false, images: [] })}>
-                        <IonHeader>
-                            <IonToolbar color={`primary`}>
-                                <IonBackdrop></IonBackdrop>
-                                <IonButton color={`light`} fill={`clear`} slot={`start`}>
-                                    <IonIcon icon={arrowBack}></IonIcon>
-                                </IonButton>
-                                <IonTitle>view images</IonTitle>
-                            </IonToolbar>
-                        </IonHeader>
-                        <IonContent>
-                          {
-                                currentImages.images.map((img, index) => (!currentImages.local) ? <ImageDownload key={index} image={img} sendUrl={() => { }} /> : <IonImg src={img} />)
-                            }
-                            <IonList>
+                        <IonModal isOpen={currentImages.images.length > 0} onDidDismiss={() => setcurrentImages({ local: false, images: [] })}>
+                            <IonHeader>
+                                <IonToolbar color={`primary`}>
+                                    <IonBackdrop></IonBackdrop>
+                                    <IonButton color={`light`} fill={`clear`} slot={`start`}>
+                                        <IonIcon icon={arrowBack}></IonIcon>
+                                    </IonButton>
+                                    <IonTitle>view images</IonTitle>
+                                </IonToolbar>
+                            </IonHeader>
+                            <IonContent>
+                                {
+                                    currentImages.images.map((img, index) => (!currentImages.local) ? <ImageDownload key={index} image={img} sendUrl={() => { }} /> : <IonImg src={img} />)
+                                }
+                                <IonList>
 
-                                <p className={`ion-padding`}>{Infopost?.message}</p>
-                                <p> {Infopost?.contact && <IonButton fill={`outline`} color={`dark`}>
-                                    contact
+                                    <p className={`ion-padding`}>{Infopost?.message}</p>
+                                    <p> {Infopost?.contact && <IonButton fill={`outline`} color={`dark`}>
+                                        contact
                                          </IonButton>}</p>
-                                <p> {Infopost?.email && <IonButton fill={`outline`} color={`dark`}>
-                                    email us
+                                    <p> {Infopost?.email && <IonButton fill={`outline`} color={`dark`}>
+                                        email us
                                          </IonButton>}</p>
+                                         
                             </IonList>
                         </IonContent>
 
                     </IonModal>
-                    <IonModal mode={`ios`} swipeToClose isOpen={openReactions != undefined} onDidDismiss={() => { setopenReactions(undefined) }}>
-                        <ModalContent posts={openReactions}></ModalContent>
-                    </IonModal>
+
                     <FriendsModal isOpen={seefriends} onDidDismiss={() => { setseefriends(false) }}></FriendsModal>
+                    
+                    </IonToolbar>
                 </IonList>
-                <IonToast buttons={[{ side: `start` }]}  cssClass={`network-toast`} position={`top`} mode={`ios`} onDidDismiss={() => setnetworkToast({ ...networkToast, message: `` })} duration={2600} isOpen={networkToast.message != ``} color={networkToast.color} message={networkToast.message} ></IonToast>
-            </IonContent>
+                <IonToast buttons={[{ side: `start` }]} cssClass={`network-toast`} position={`top`} mode={`ios`} onDidDismiss={() => setnetworkToast({ ...networkToast, message: `` })} duration={2600} isOpen={networkToast.message != ``} color={networkToast.color} message={networkToast.message} ></IonToast>
+            </IonContent> */}
             {  <IonFab className={`option-fab`} horizontal="end" vertical="bottom">
                 <IonFabButton onClick={() => { setcreateAgist(true) }} color={`tertiary`} >
                     <IonIcon icon={add} />
-                    {/* <IonBadge color={`danger`}>3</IonBadge> */}
                 </IonFabButton>
-                {/* <IonFabList side={`top`}> */}
 
-                {/* <IonFabButton onClick={() => { setcreateAgist(true) }} color={`primary`} >
-                        <IonIcon icon={add} />
-                    </IonFabButton> */}
-                {/* <IonFabButton  >
-                        <IonIcon icon={notifications} />
-                        <IonBadge color={`danger`}>3</IonBadge> 
-                       </IonFabButton> */}
-                {/* <IonFabButton onClick={() => setseefriends(true)} > */}
-                {/* <IonIcon icon={people} /> */}
-                {/* {notifyState>0&&  <IonBadge color={`danger`}>{notifyState}</IonBadge>} */}
-                {/* </IonFabButton> */}
-                {/* </IonFabList> */}
             </IonFab>}
-        </>
+       </> 
     )
 }
 export default Gist;
@@ -474,33 +407,14 @@ export const Appshare = (currentImgUrl: string) => {
 export const Download = (btnRef: React.RefObject<HTMLIonButtonElement>, currentImgUrl: string) => {
     Plugins.Clipboard.write({ url: currentImgUrl })
     const link = document.createElement('a');
-                link.href = currentImgUrl ;
-                 link.download = `post.jpg`;
-                 link.target=`__blank`
-                link.click();
-    // fetch(currentImgUrl, { mode: `no-cors` }).then(res => {
+    link.href = currentImgUrl;
+    link.download = `post.jpg`;
+    link.target = `__blank`
+    link.click();
 
-    //     res.blob().then((res) => {
-    //         let value = res
-    //         let fr = new FileReader()
-    //         fr.onload = () => {
-    //             const link = document.createElement('a');
-    //             link.href = fr.result + ``;
-    //             document.body.appendChild(link);
-    //             link.download = `post.jpg`
-    //             link.click();
-    //             document.body.removeChild(link);
-    //             Plugins.Filesystem.writeFile({ data: fr.result + ``, path: `findie`, directory: FilesystemDirectory.Data }).then(() => {
-    //                 Plugins.Toast.show({ text: `saved`, duration: `short`, position: `center` })
-    //             })
-    //         }
-    //         fr.readAsDataURL(value)
-
-    //     })
-    // }) 
 
 }
-const ReportPost = (post: PostInterface | undefined, userid: string | undefined) => {
+export const ReportPost = (post: PostInterface | undefined, userid: string | undefined) => {
     const database = firebase.database()
     let uid = userid
     if (!userid) {
@@ -517,6 +431,32 @@ const ReportPost = (post: PostInterface | undefined, userid: string | undefined)
 }
 
 
+export function DeletePost(user: userInterface | any, database: any, currentPost: PostInterface) {
+    if (user) {
+        Plugins.Toast.show({ text: `Deleting Post...` })
+        let images: string[] = Object.values(currentPost?.images)
+
+        database.ref(`FindieGists/${user?.faculty}`).child(`${currentPost?.id}`).remove().then(() => {
+            if (images.length <= 0) {
+                Plugins.Toast.show({ text: `Deleting Post ${Math.ceil(Math.random() * 10)}%` }).then(() => {
+                    Plugins.Toast.show({ text: `Post Deleted` })
+                })
+            }
+        })
+
+
+        for (let i = 0; i < images.length; i++) {
+
+            storage().refFromURL(images[i]).delete().then(() => {
+                if (i === images.length - 1) {
+                    Plugins.Toast.show({ text: `Post has been Deleted` })
+                }
+            })
+        }
+
+    }
+
+}
 
 
 

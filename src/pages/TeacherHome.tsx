@@ -1,16 +1,15 @@
-import { Plugins } from "@capacitor/core";
-import { IonAvatar, IonButton, IonButtons, IonHeader, IonIcon, IonImg, IonItem, IonLabel, IonModal, IonTitle, IonToolbar, useIonViewDidEnter } from "@ionic/react";
-import firebase from "firebase";
-import { add, chevronBack, personAdd } from "ionicons/icons";
 import React, { useEffect, useState } from "react";
-import { useHistory, useLocation } from "react-router";
-import { HideTab } from "../App";
+import { Plugins } from "@capacitor/core";
+import { IonAvatar, IonButton, IonButtons, IonHeader, IonIcon, IonImg, IonItem, IonLabel, IonModal, IonToolbar, useIonViewDidEnter, useIonViewWillLeave } from "@ionic/react";
+import { add, chevronBack } from "ionicons/icons";
+import { useHistory } from "react-router";
 import Pictures from "../media/images/images";
 import { infoInterface, getStorage, InfoModal } from "./Info";
 import AddModal, { ContentInterface, filesInterface } from "./Teachers/AddModal";
 import { AnouncementTeacherCard } from "./Teachers/AnnouncementCard";
 import { InfoCard } from "./Teachers/InfoCard";
-
+import firebase from "../firebase/Firebase";import { HideTab } from "../App";
+;
 
 const TeacherHome:React.FC<{location:any}>=({location})=>{
     
@@ -115,7 +114,13 @@ const TeacherHome:React.FC<{location:any}>=({location})=>{
          
         }
     }
-
+    useIonViewDidEnter(() => {
+        HideTab(true)
+      })
+      useIonViewWillLeave(() => {
+        HideTab(false)
+      })
+      
     return(
         <> 
         <IonHeader>

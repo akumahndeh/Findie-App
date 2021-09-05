@@ -5,8 +5,12 @@
     margin-top: 10%;
 
 }
+.profile-content{
+    --background: var(--ion-color-light);
+}
 body.dark .profile-content{
   --ion-color-primary:rgb(6, 78, 146);
+  
 }
 body.dark .profile-content ion-button ion-label{
     color:white

@@ -41,7 +41,7 @@
      --ion-background-color: black
  }
 
- .tour-card>img {
+ .tour-card>ion-img {
      width: 100%;
      object-fit: cover;
      opacity: 0.5;
@@ -88,7 +88,7 @@
  }
 
 
- body.dark .tour-card>img {
+ body.dark .tour-card>ion-img {
      opacity: 0.6;
  }
 
@@ -120,4 +120,15 @@
 
  .tour-info ion-card {
      filter: hue-rotate(-10deg)
+ }
+ .tour-video{
+     padding:10px;
+ }
+
+ .tour-video iframe{
+     border: 0;
+     border-radius: 10px;
+     width:100%;
+     height: 250px;
+
  }

@@ -1,8 +1,8 @@
 import { IonHeader, IonToolbar, IonItem, IonButtons, IonIcon, IonBackdrop, IonTitle, IonContent, IonCard, IonCardContent, IonLabel, IonInput, IonButton, IonLoading } from "@ionic/react";
-import firebase from "firebase";
 import { chevronBack } from "ionicons/icons";
 import React, { useState } from "react";
 import { useHistory } from "react-router"; 
+import firebase from "../../firebase/Firebase";
 
 export const Modal: React.FC <{onDidDismiss:Function}>= ({onDidDismiss}) => {
      let history=useHistory()
@@ -12,7 +12,8 @@ export const Modal: React.FC <{onDidDismiss:Function}>= ({onDidDismiss}) => {
         event.preventDefault()
         let email = event.target.email.value.toLowerCase().trim()
         let password= event.target.password.value
-        setloading(true)
+        // setloading(true)
+        history.push(`/teachers/admin`)
         firebase.firestore().collection(`admins`).where(`email`, `==`, email)
             .get().then((res) => {
                 if (res.empty) {

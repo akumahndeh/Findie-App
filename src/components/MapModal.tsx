@@ -1,30 +1,45 @@
 import React, { useState, useRef, useEffect } from "react"
-import { IonModal, IonContent, IonImg, IonFabButton, IonFab, IonFabList, IonTitle, IonIcon, useIonViewDidLeave, IonToast, IonLabel, IonHeader, IonToolbar, IonList, IonItem, IonText, createGesture, IonPopover, IonCardContent, IonAlert, AlertButton, AlertInput, IonLoading, IonSpinner, IonToggle, IonListHeader, IonChip } from "@ionic/react"
+import { IonModal, IonContent, IonImg, IonFabButton, IonFab, IonFabList, IonTitle, IonIcon, useIonViewDidLeave, IonToast, IonHeader, IonToolbar, IonList, IonItem, IonText, createGesture, IonPopover, IonCardContent, IonLoading, IonCard, IonSlides, IonSlide } from "@ionic/react"
 
-import { close, menu, locate, barChart, pinOutline, people, search, settings, call } from "ionicons/icons"
+import { close, menu, locate, barChart, pinOutline, logoGoogle, logoFacebook, repeatOutline } from "ionicons/icons"
 import "./MapModal.css"
 import { GeolocationPosition, HapticsImpactStyle, HapticsNotificationType, Plugins } from "@capacitor/core"
 import ViewPicture from "./ViewPicture"
-import ReactSpeedometer from "react-d3-speedometer"; 
+import ReactSpeedometer from "react-d3-speedometer";
 import { selectedPlaces } from "../media/images/images"
-import firebase from "firebase"
-import { getStorage, notifyUser, userInterface } from "../pages/Info"
+import firebase from "../firebase/Firebase";
+import { userInterface } from "../pages/Info"
 import map from "../media/images/map.png"
 import { initializeTheme } from "../App"
+import { useLocation } from "react-router"
+
+
+
+export interface locationInterface{
+    type: string;
+    name: string;
+    coords: number[];
+    maxCoords: {
+        x: number;
+        y: number;
+    };
+    about: string;
+    describtion: string;
+    mainpic: string;
+}
 
 const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: number, y: number }[] | undefined, placename: string, isOpen: boolean, img: string, maxCoords: { x: number, y: number }, onDidDismiss: any, closeModal: Function }> = props => {
     let minCoords = { x: props.maxCoords?.x / 1.2418181818181817, y: props.maxCoords?.y / 1.2427184466019416 }
     let database = firebase.database()
     const [mapWidth, setmapWidth] = useState<number>(1100);
     const [offset, setoffset] = useState(minCoords);
-    const content = useRef<HTMLIonContentElement>(null) 
+    const content = useRef<HTMLIonContentElement>(null)
     const [userLocation, setuserLocation] = useState<GeolocationPosition>();
     const [viewimage, setviewimage] = useState(``);
     const [locationToast, setlocationToast] = useState<string | undefined>(undefined);
     const [outofRange, setoutofRange] = useState(false);
     const [openstats, setopenstats] = useState(false);
     const [distance, setdistance] = useState<number>();
-    const [popImages, setpopImages] = useState<any>([]);
     const [popImgstyle] = useState({ opacity: 1, transform: `translateY(${0}px)` });
     const [geoid, setgeoid] = useState<string>();
     const [viewOthers, setviewOthers] = useState(false);
@@ -32,24 +47,17 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
     const [user, setuser] = useState<userInterface>();
     const [friends, setfriends] = useState<{ id: string, geo: GeolocationPosition }[]>([]);
     const [fetchingFriend, setfetchingFriend] = useState(false);
-    const [friendsObj, setfriendsObj] = useState<any>();
-    const [friendName, setfriendName] = useState<string>();
-    const [friendImg, setfriendImg] = useState<string>();
-    const [friendInfo, setfriendInfo] = useState(false);
-    const [showPeople, setshowPeople] = useState(false);
-    const [visible, setvisible] = useState(false);
+    const [googleMap, setgoogleMap] = useState(false)
+    const [googleMapCoords, setgoogleMapCoords] = useState({ long: offset.x, lat: offset.y })
 
-    const [clickedLocation, setclickedLocation] = useState<{
-        type: string;
-        name: string;
-        maxCoords: {
-            x: number;
-            y: number;
-        };
-        about: string;
-        describtion: string;
-        mainpic: string;
-    } | undefined>();
+
+    useEffect(() => {
+        
+        setgoogleMapCoords({lat:userLocation?.coords.latitude||0, long:userLocation?.coords.longitude||0})
+        setgoogleMapCoords({ long: convertXtoLong(offset.x, mapWidth), lat: convertYtoLat(offset.y) })
+    }, [googleMap])
+
+    const [clickedLocation, setclickedLocation] = useState<locationInterface | undefined>();
     const gearColor = [
         { left: `yellow`, right: `red` },
         { left: `lightblue`, right: `darkblue` },
@@ -59,9 +67,6 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
 
     ]
     const [choosen, setchoosen] = useState(0);
-    let popModal = useRef<HTMLIonContentElement>(null)
-    const AlertButtons: (string | AlertButton)[] = [{ text: `Find Friend`, cssClass: ``, handler: (event) => findFriend(event) }, { text: `cancel` }]
-    const AlertInputs: (AlertInput)[] = [{ min: 9, max: 13, placeholder: `Enter Friend\`s phone number`, type: `number`, name: `number` }]
 
     const [mapel, setmapel] = useState<any>();
     const closeModal = () => {
@@ -71,33 +76,10 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
     function shareLocation() {
         setshowLocationAlert(true)
     }
-    function findFriend(event: any) {
-        let number = event.number;
 
-        setfetchingFriend(true)
-        database.ref(`locations`).child(number).on(`value`, (snap) => {
-            let value = snap.val()
-            if (value) {
-                let friendPos: GeolocationPosition = JSON.parse(value)
-                setfriendsObj({ ...friendsObj, [number]: friendPos })
 
-            }
-            else {
-                Plugins.Modals.alert({ message: `User may not have the Findie app opened or location is switched off`, title: `Unable to Find Friend`, buttonTitle: `Ok Findie` })
-            }
 
-            setfetchingFriend(false)
-        })
 
-    }
-
-    useEffect(() => {
-        if (friendsObj) {
-            let friendtemp = Object.keys(friendsObj).map((key) => ({ id: key, geo: friendsObj[key] }))
-            setfriends(friendtemp)
-        }
-    }, [friendsObj]);
-     
 
     const resizeTo = (value: number) => {
         setmapWidth(value);
@@ -135,12 +117,12 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
             Plugins.StatusBar.setOverlaysWebView({ overlay: false }).catch(console.log)
 
         }
-       if(!props.isOpen){
-        Plugins.StatusBar.show().catch(() => { })
-         initializeTheme()
-        
-       }
-     
+        if (!props.isOpen) {
+            Plugins.StatusBar.show().catch(() => { })
+            initializeTheme()
+
+        }
+
     }, [props]);
 
 
@@ -160,29 +142,13 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
     }, [userLocation]);
 
 
-    const updateConditionally = (initialLocation: GeolocationPosition | undefined, currentLocation: GeolocationPosition) => {
 
-        if (initialLocation) {
-            let latitudeDiff = computeAproxLat(initialLocation.coords.latitude, mapWidth) - computeAproxLat(currentLocation.coords.latitude, mapWidth)
-            let longitudeDiff = computeAproxLong(initialLocation.coords.longitude, mapWidth) - computeAproxLong(currentLocation.coords.longitude, mapWidth)
-            if (latitudeDiff > 80 || longitudeDiff > 80) {
-                uploadMyLocation()
-
-            }
-        }
-        else {
-            uploadMyLocation()
-        }
-
-
-    }
     var id: any
     function fetchLocation() {
         if (id) Plugins.Geolocation.clearWatch(id);
         id = Plugins.Geolocation.watchPosition({ enableHighAccuracy: true, maximumAge: 1000 }, res => {
             console.log(res)
             if (res) {
-                updateConditionally(userLocation, res)
                 setuserLocation(res)
 
             } else {
@@ -251,11 +217,12 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
             } else {
                 if (outofRange) {
                     Plugins.Toast.show({ text: `you are in school` }).catch(() => alert(`you are in school`))
-                    notifyUser(`You are in school`, `last checked ${(new Date()).toLocaleTimeString()}`)
                     setoutofRange(false)
                 }
             }
         }
+
+
         if (mapWidth == 1100) {
             h = 618
         }
@@ -264,6 +231,7 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
         console.log(y)
         return y;
     }
+
 
     function computeHeading(heading: number | undefined) {
         if (heading) {
@@ -309,103 +277,22 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
         }
     }, [mapel]);
 
-    async function uploadMyLocation() {
-        let string = (await getStorage(`user`)).value
-        if (string) {
-            let user: userInterface = JSON.parse(string)
-            setuser(user)
-            if (userLocation && visible) {
-                database.ref(`locations`).child(user.number).set(JSON.stringify(userLocation))
-                    .catch((err) => {
-                        Plugins.Toast.show({ text: err.message })
-                    }).then(() => {
-                        Plugins.Toast.show({ text: `updated` })
-                    })
 
-            }
-
+    function convertYtoLat(y: number) {
+        let h = 768
+        if (mapWidth == 1100) {
+            h = 618
         }
-    }
-    function fetchUser(id: string) {
-        setfriendInfo(true)
-        database.ref(`users/`).orderByChild(`number`).equalTo(id).once(`value`, snap => {
-            let value: userInterface = snap.val()
-            if (value) {
-                setfriendName(value.firstName + ` ` + value.lastName)
-                setfriendImg(value.image)
-            }
-            alert(value)
-        })
-
+        const lat = -(y * ((4.152133 - 4.143990) / h) + 4.143990 - h * ((4.152133 - 4.143990) / h))
+        return Math.abs(lat)
     }
 
-    function viewPeople(){
-     setshowPeople(true)
-    }
-    function toggleVisibility(){
-        if(visible){
-            if(user){
-                database.ref(`locations`).child(user?.number).remove().then(()=>{
-                    Plugins.Toast.show({text:`Going invisible...`})
-                    setvisible(false)
-                })
-                 }
-        }
-        setvisible(!visible)
-    }
-    useEffect(() => {
-        if(visible && user){
-            database.ref(`locations`).child(user?.number).set(JSON.stringify(userLocation))
-            .catch((err) => {
-                Plugins.Toast.show({ text: err.message })
-            }).then(() => {
-                Plugins.Toast.show({ text: `updated` })
-            })
-        }
-        
-    }, [visible]);
+
+
     return (
         <>
 
             <IonModal swipeToClose mode="ios" isOpen={props.isOpen} onDidDismiss={props.onDidDismiss}>
-                <IonPopover isOpen={friendInfo} onDidDismiss={() => { setfriendInfo(false); setfriendName(undefined) }}>
-                    <img src={friendImg} alt="" />
-                    {friendImg == undefined && <IonSpinner />}
-                    <IonContent>
-                        <IonCardContent>
-                            <IonText>
-                                {friendName}
-                                {friendName == undefined && <IonSpinner />}
-                            </IonText>
-                        </IonCardContent>
-                    </IonContent>
-                </IonPopover>
-                <IonPopover isOpen={showPeople} onDidDismiss={()=>setshowPeople(false)}>
-                    <IonContent>
-                        <IonToolbar>
-                          <IonItem>
-                              <IonLabel>Turn on visibility to friends</IonLabel>
-                              <IonToggle checked={visible} onIonChange={()=>toggleVisibility()}></IonToggle>
-                          </IonItem>
-                          <IonList>
-                              <IonItem>
-                              <IonListHeader>visible friends</IonListHeader>
-                              </IonItem>
-                              <IonCardContent>
-                              {friends.map((friend,index)=>{
-                                  return <IonChip>
-                                      <IonIcon icon={call}/>
-                                      {friend.id}
-                                  </IonChip>
-                              })}
-                              {
-                                  friends.length<=0&&<IonTitle>none</IonTitle>
-                              }
-                              </IonCardContent>
-                          </IonList>
-                        </IonToolbar>
-                    </IonContent>
-                </IonPopover>
                 <IonLoading message={`fetching friend\`s location`} isOpen={fetchingFriend} onDidDismiss={() => setfetchingFriend(false)} />
                 <IonContent ref={content} scrollY style={{ position: "relative" }} className={`map-content`} scrollX>
                     <IonPopover cssClass={`describtion-pop`} animated isOpen={clickedLocation != undefined} onDidDismiss={() => { setclickedLocation(undefined) }}>
@@ -418,61 +305,48 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
                             </IonCardContent>
                         </IonContent>
                     </IonPopover>
-                    <IonAlert  inputs={AlertInputs} onDidDismiss={() => setshowLocationAlert(false)} isOpen={showLocationAlert} buttons={AlertButtons} header={`Find Friend on Campus - In Beta`} message={`Enter the Phone number of the person you want to Find`} ></IonAlert>
+                    {googleMap && <iframe src={`http://maps.google.com/maps?q=${props.Place.coords[0]},${props.Place.coords[1]}&z=16&output=embed`} style={{ height: `100vh`, width: `100vw`, transition: `1s` }} ></iframe>
+                    }   {!googleMap && <>
+                        <div className="map-container">
+                            <IonImg onIonImgDidLoad={(el) => { setmapel(el) }} datatype={`webp`} onClick={() => setopenstats(false)} onDoubleClick={expandContract} alt="" className="mapImg" style={{ width: `${mapWidth}px` }} src={map} />
 
-                    <div className="map-container">
-
-
-                        <IonImg onIonImgDidLoad={(el) => { setmapel(el) }} datatype={`webp`} onClick={() => setopenstats(false)} onDoubleClick={expandContract} alt="" className="mapImg" style={{ width: `${mapWidth}px` }} src={map} />
-                        <div className="marker" style={{ top: `${offset?.y - 40}px`, left: `${offset?.x - 40}px` }}>
+                            <div className="marker" style={{ top: `${offset?.y - 40}px`, left: `${offset?.x - 40}px` }}>
+                                <div className="arrow"></div>
+                                <div className="pin" onClick={() => { setlocationToast(`choosen Destination`); }}></div>
+                                <div className="pin-effect"></div>
+                            </div>
+                        </div>
+                        <div className="markerRed" style={{ transform: `rotate(${computeHeading(userLocation?.coords.heading) - 35}deg)`, top: `${computeLat(userLocation?.coords.latitude) - 60}px`, left: `${computeLong(userLocation?.coords.longitude) - 40}px` }}>
                             <div className="arrow"></div>
-                            <div className="pin" onClick={() => { setlocationToast(`choosen Destination`); }}></div>
+                            <div className="pin" onClick={() => { setlocationToast(`Your location`) }} ></div>
                             <div className="pin-effect"></div>
                         </div>
-                    </div>
-                    <div className="markerRed" style={{ transform: `rotate(${computeHeading(userLocation?.coords.heading) - 35}deg)`, top: `${computeLat(userLocation?.coords.latitude) - 60}px`, left: `${computeLong(userLocation?.coords.longitude) - 40}px` }}>
-                        <div className="arrow"></div>
-                        <div className="pin" onClick={() => { setlocationToast(`Your location`) }} ></div>
-                        <div className="pin-effect"></div>
-                    </div>
-                    <IonToast translucent mode={`ios`} color={`light`} position={`bottom`} duration={1500} message={locationToast} isOpen={locationToast != undefined} onDidDismiss={() => setlocationToast(undefined)} ></IonToast>
-                    {
-                        viewOthers && mapWidth != 1100 && selectedPlaces.map(ele => {
-                            let coords = { x: ele.maxCoords?.x / 1.2418181818181817, y: ele.maxCoords?.y / 1.2427184466019416 }
+                        <IonToast translucent mode={`ios`} color={`light`} position={`bottom`} duration={1500} message={locationToast} isOpen={locationToast != undefined} onDidDismiss={() => setlocationToast(undefined)} ></IonToast>
+                        {
+                            viewOthers && mapWidth != 1100 && selectedPlaces.map(ele => {
+                                let coords = { x: ele.maxCoords?.x / 1.2418181818181817, y: ele.maxCoords?.y / 1.2427184466019416 }
 
-                            return <div className="allmarkers" style={{ top: `${mapWidth === 1100 ? coords.y : ele.maxCoords.y - 40}px`, left: `${mapWidth === 1100 ? coords.x : ele.maxCoords.x - 40}px` }}>
+                                return <div className="allmarkers" style={{ top: `${mapWidth === 1100 ? coords.y : ele.maxCoords.y - 40}px`, left: `${mapWidth === 1100 ? coords.x : ele.maxCoords.x - 40}px` }}>
 
-                                <div className="pin others" onClick={() => { setclickedLocation(ele); }}></div>
+                                    <div className="pin others" onClick={() => { setclickedLocation(ele); }}></div>
 
-                            </div>
-                        })
-                    }
-                    {
-                        friends.map((pos, index) => {
-                            return <FriendsPin mapWidth={mapWidth} key={index} position={pos} initiateFetch={fetchUser} ></FriendsPin>
-                        })
-                    }
+                                </div>
+                            })
+                        }
+                    </>}
                 </IonContent>
-                
-                    <MenuFab viewed={viewOthers} viewOthers={() => { setviewOthers(!viewOthers); resizeTo(1366) }} viewstats={() => setopenstats(true)} locate={find} resizeTo={resizeTo} closeModal={closeModal}></MenuFab>
-                    <IonFab  vertical={`center`} horizontal={`end`}>
-                        <IonFabButton  color={`light`}>
-                            <IonIcon icon={people} />
-                        </IonFabButton>
-                        <IonFabList  side={`top`}>
-                            <IonFabButton onClick={() => shareLocation()}>
-                                <IonIcon icon={search} />
-                            </IonFabButton>
-                            <IonFabButton onClick={viewPeople}>
-                                <IonIcon icon={settings} />
-                            </IonFabButton>
-                        </IonFabList>
-                        
-                    </IonFab>
-               
-                
-                  <div onClick={() => setviewimage(props.img)}><ImageFab maxCoordsY={props.maxCoords?.y} Image={props.img}></ImageFab></div>
-                
+
+                {!googleMap && <><MenuFab viewed={viewOthers} viewOthers={() => { setviewOthers(!viewOthers); resizeTo(1366) }} viewstats={() => setopenstats(true)} locate={find} resizeTo={resizeTo} closeModal={closeModal}></MenuFab>
+                </>}
+{/* 
+                <IonFab  onClick={() => { setgoogleMap(!googleMap) }} style={{ transform: `translate(0, -20px)` }} vertical={`center`} horizontal={`end`}>
+                    <IonFabButton mode={`md`} color={`dark`}>
+                        <IonIcon icon={repeatOutline} />
+                    </IonFabButton>
+                </IonFab> */}
+
+                <div style={{transform:googleMap?`translate(0,-40px)`:`translate(0,0)`, transition:`1s`}} onClick={() => setviewimage(props.img)}><ImageFab maxCoordsY={props.maxCoords?.y} Image={props.img}></ImageFab></div>
+
                 <ViewPicture description={props.Place?.about} isOpen={viewimage != ``} OndidDismiss={() => { setviewimage(``) }} imageRef={viewimage} ></ViewPicture>
 
             </IonModal>
@@ -529,38 +403,11 @@ const MapModal: React.FC<{ Place: any, moreImages: any[], otherMarkers: { x: num
 export default MapModal;
 
 
-const FriendsPin: React.FC<{ position: { id: string, geo: GeolocationPosition }, mapWidth: number, initiateFetch: Function }> = ({ position, mapWidth, initiateFetch }) => {
-    const [ranColor, setranColor] = useState(getRandomColor())
-    const [top, settop] = useState(0);
-    const [left, setleft] = useState(0);
-    const { id, geo } = position
-
-    useEffect(() => {
-        settop(computeAproxLat(geo.coords.latitude, mapWidth, `user may not be on campus`))
-        setleft(computeAproxLong(geo.coords.latitude, mapWidth, `user may not be on campus`))
-    }, []);
-    return (
-        <div onClick={() => { initiateFetch(id) }} className="markerRed friends" style={{ top: `${top - 60}px`, left: `${left - 40}px` }}>
-            <div className="arrow"></div>
-            <div className="pin" style={{ background: ranColor }} ></div>
-            <div className="pin-effect" style={{ background: ranColor }} ></div>
-        </div>
-    )
-}
 
 const MenuFab: React.FC<{ viewed: boolean, viewOthers: Function, viewstats: Function; closeModal: Function, locate: Function, resizeTo: Function }> = (props) => {
     const [expandMap, setexpandMap] = useState(true);
     const { viewstats, viewOthers, viewed } = props
     const [] = useState(true);
-    const resizeMap = () => {
-        if (expandMap) {
-            props.resizeTo(1366)
-        }
-        else {
-            props.resizeTo(1100)
-        }
-        setexpandMap(!expandMap)
-    }
     const maplocate = () => {
         props.locate()
     }
@@ -666,10 +513,11 @@ function getAngle(val: number | undefined, min: number, max: number) {
 }
 
 export function HapticVibrate() {
-    try{Plugins.Haptics.vibrate()
-    Plugins.Haptics.notification({ type: HapticsNotificationType.SUCCESS })
-    Plugins.Haptics.impact({ style: HapticsImpactStyle.Heavy })
-}catch{}
+    try {
+        Plugins.Haptics.vibrate()
+        Plugins.Haptics.notification({ type: HapticsNotificationType.SUCCESS })
+        Plugins.Haptics.impact({ style: HapticsImpactStyle.Heavy })
+    } catch { }
 }
 
 function ActualLong(long: number | undefined, mapWidth: number) {
@@ -699,52 +547,18 @@ function ActualLat(lat: number | undefined, mapWidth: number) {
     }
 }
 
-function getRandomColor() {
-    let R = Math.ceil(Math.random() * 1000) % 255
-    let G = Math.ceil(Math.random() * 1000) % 255
-    let B = Math.ceil(Math.random() * 1000) % 255
-    return `rgb(${R},${G},${B})`;
-}
 
-function computeAproxLong(long: number | undefined, mapWidth: number, notfoundText = `user not found`) {
+var userCounter = 1;
 
-    if (!long) {
+
+function convertXtoLong(x: number, mapWidth: number) {
+
+    if (!x) {
         return 0
-
-    }
-    if (long > 9.292873 || long < 9.277874) {
-        Plugins.Toast.show({ text: notfoundText, position: `center` })
-        if(userCounter%2)
-        Plugins.Toast.show({ text: notfoundText, position: `center` })
-
-        return 0;
     }
 
     let alpha = (9.292873 - 9.277874) / mapWidth
-    let x = (long - 9.277874) / alpha
-    console.log(x)
+    let long = x * alpha + 9.277874
 
-    return x;
-}
-var userCounter=1;
-function computeAproxLat(lat: number | undefined, mapWidth: number, notfoundText = `user not found`) {
-    let h = 768
-    if (!lat) {
-        if(userCounter%2)
-        Plugins.Toast.show({ text: notfoundText, position: `center` })
-
-        userCounter++
-
-        return 0
-
-    }
-
-
-    if (mapWidth == 1100) {
-        h = 618
-    }
-    let beta = (4.152133 - 4.143990) / h
-    let y = h - (lat - 4.143990) / beta
-    console.log(y)
-    return y;
+    return Math.abs(long)
 }

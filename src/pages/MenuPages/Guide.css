@@ -52,3 +52,6 @@ body.dark .guide-info  ion-progress-bar.read-progress{
      --progress-background:#0e1d36;
     
 }
+body.dark guide-info p{
+  color: white !important;
+}

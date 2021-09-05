@@ -1,72 +1,99 @@
 import React, { useEffect, useState } from "react"
-import { IonCard, IonCardHeader, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonText, IonCheckbox, IonCardTitle, IonProgressBar } from "@ionic/react"
+import { IonCard, IonCardHeader, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonSelect, IonSelectOption, IonText, IonCheckbox, IonCardTitle, IonProgressBar, IonLoading } from "@ionic/react"
 import { Plugins } from "@capacitor/core";
 import  "./signupCard.css"
+import { userInterface } from "../pages/Info";
+import { auth, db, fstore } from "../firebase/Firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { selectUser, update_user } from "../state/user-state";
+import { useHistory } from "react-router";
+ 
+
+
+const {Modals, Storage} = Plugins
+
+const defaultUser={email:``,pass:``,faculty:``,image:``,username:``,number:``}
 
 const PersonalInfoCard: React.FC<{ getUserInfo: Function }> = (props) => {
   const [faculty, setfaculty] = useState("");
   const [accept, setaccept] = useState(false);
-  const [progress, setprogress] = useState({firstName:0,lastName:0,advert:0, code:0, pass:0,faculty:0, email:0,department:0,id:0,number:0});
-  const [pvalue, setpvalue] = useState(0);
-  function submit(event: any) {
+  const [userInfo, setuserInfo]= useState<userInterface>(defaultUser)
+  const [loading, setloading] = useState(false)
+  const userData = useSelector(selectUser)
+  const dispatch= useDispatch()
+  const history = useHistory()
+
+  useEffect(()=>{
+    console.log(userData)
+  },[userData])
+
+  async function submit(event: any) {
         event.preventDefault()
-        let formObject = event.target
-        let userInfo: any[] = []
-        for (const key in formObject) {
-            if (Object.prototype.hasOwnProperty.call(formObject, key)) {
-                if (formObject[key].name)
-                   {  if(formObject[key].name==`email` || formObject[key].name==`pass`){
-                       userInfo[formObject[key].name] = formObject[key].value.toLowerCase()
-                    }else{
-                        userInfo[formObject[key].name] = formObject[key].value
-                    }
-                }
-            }
+      try{
+        if(!validateCredentials(Object.values({...userInfo,image:`sjkk`,number:`jwhhdj`}))){
+            Modals.alert({message:`Some credentials have not been entered`,title:`Missen info`})
+            console.log(userInfo)
+            return;
         }
-        props.getUserInfo(userInfo)
+
+        const user = userInfo
+        setloading(true)
+       await auth.createUserWithEmailAndPassword(user.email, user.pass)
+       await fstore.collection(`users`).doc(user.email).set(user)
+       Storage.set({ key: `user`, value: JSON.stringify(user) }) 
+       Storage.set({ key: "userid", value: user.email })
+       history.push(`/guide`)
+       dispatch(update_user(user))
+       setloading(false)
+      }
+      catch(err)   {
+        setloading(false)
+        Modals.alert({message:err.message||`unexpected error occured while signing in`,title:`Authentication error`})
+      }
+   
     }
-    function updateProgress(event:any){
-        let name:string=event.target.name
-        if(event.target.value!=``)
-          setprogress({...progress,[name]:0.1})
-        else{
-            setprogress({...progress,[name]:0.0})
-          }
-    }
-    useEffect(() => {
-       let arr= Object.values(progress).filter((val:number)=>val!=0)
+
+    // function updateProgress(event:any){
+    //     let name:string=event.target.name
+    //     if(event.target.value!=``)
+    //       setprogress({...progress,[name]:0.2})
+    //     else{
+    //         setprogress({...progress,[name]:0.0})
+    //       }
+    // }
+    // useEffect(() => {
+    //    let arr= Object.values(progress).filter((val:number)=>val!=0)
       
-         setpvalue(
-            arr.length*0.1
-         )
-    }, [progress]);
+    //      setpvalue(
+    //         arr.length*0.1
+    //      )
+    // }, [progress]);
     return (
         <>
         <IonCard >
             <IonCardHeader color="primary">
                 Final Step
                   </IonCardHeader>
-                  <IonProgressBar color={`danger`} value={pvalue+((accept)?0.3:0)}></IonProgressBar>
             <IonLabel color={`danger`}>
-            {pvalue==0.2 && pvalue<0.4?`keep going 😃`:pvalue>=0.5 && accept==false?`almost there 😘`:pvalue>=0.7 && accept==true?`Complete 🥂`:``}
-
+            <IonLoading onDidDismiss={() => setloading(false)} isOpen={loading} message="please wait..." spinner="bubbles" ></IonLoading>
+                  
             </IonLabel>
             <IonCardContent>
                 <form onSubmit={submit}>
                     <IonItem>
-                        <IonLabel position="floating">first name</IonLabel>
-                       <IonInput onIonChange={updateProgress} required name="firstName"></IonInput>
+                        <IonLabel position="floating">user name</IonLabel>
+                       <IonInput value={userInfo.username} onIonChange={(e)=>setuserInfo({...userInfo, username:(e.detail.value || ``).trim()})} required name="username"></IonInput>
                     </IonItem>
-                    <IonItem>
+                    {/* <IonItem>
                         <IonLabel position="floating">last name</IonLabel>
                        <IonInput onIonChange={updateProgress} required name="lastName"></IonInput>
-                    </IonItem>
+                    </IonItem> */}
                     <IonItem>
-                        <IonLabel position="floating">faculty or school</IonLabel>
+                        <IonLabel  position="floating">faculty or school</IonLabel>
                         <div style={{opacity:0}}>
-                       <IonInput onIonChange={updateProgress} style={{height:"1px"}} required name="faculty" value={faculty}></IonInput>
+                       <IonInput value={userInfo.faculty} onIonChange={(e)=>setuserInfo({...userInfo, faculty:(e.detail.value || ``).trim()})}    style={{height:"1px"}} required name="faculty" ></IonInput>
                         </div>
-                        <IonSelect className={`faculty-options`} onIonChange={(e:any)=>setfaculty(e.target.value)} aria-required interface="action-sheet" >
+                        <IonSelect className={`faculty-options`} value={userInfo.faculty} onIonChange={(e)=>setuserInfo({...userInfo, faculty:(e.detail.value || ``).trim()})} aria-required interface="action-sheet" >
                             <IonSelectOption >A.S.T.I</IonSelectOption>
                             <IonSelectOption>College Of Technology</IonSelectOption>
                             <IonSelectOption >Agriculture and Vertinary medicine</IonSelectOption>
@@ -81,22 +108,22 @@ const PersonalInfoCard: React.FC<{ getUserInfo: Function }> = (props) => {
                             <IonSelectOption>S.Y.M</IonSelectOption>
                         </IonSelect>
                     </IonItem>
-                    <IonItem>
+                    {/* <IonItem>
                         <IonLabel position="floating">department</IonLabel>
                        <IonInput onIonChange={updateProgress} required name="department"></IonInput>
-                    </IonItem>
+                    </IonItem> */}
 
-                    <IonItem>
+                    {/* <IonItem>
                         <IonLabel position="floating">phone number</IonLabel>
                        <IonInput onIonChange={updateProgress} required type='number' name="number"></IonInput>
-                    </IonItem>
+                    </IonItem> */}
                     <IonItem>
                         <IonLabel position="floating">email</IonLabel>
-                       <IonInput onIonChange={updateProgress} required type="email" name="email"></IonInput>
+                       <IonInput value={userInfo.email} onIonChange={(e)=>setuserInfo({...userInfo, email:(e.detail.value || ``).trim()})}  required type="email" name="email"></IonInput>
                     </IonItem>
                     <IonItem>
-                        <IonLabel position="floating">enter password</IonLabel>
-                       <IonInput onIonChange={updateProgress} required name="pass"></IonInput>
+                        <IonLabel  position="floating">enter password</IonLabel>
+                       <IonInput value={userInfo.pass} onIonChange={(e)=>setuserInfo({...userInfo, pass:(e.detail.value || ``).trim()})} required name="pass"></IonInput>
                     </IonItem>
                     <div className="ion-padding ion-margin-top">
                         <IonCheckbox className={`ion-margin-end`} onIonChange={(e:any)=>{ setaccept(e.detail.checked)}}></IonCheckbox><IonLabel>i accept the <IonText onClick={viewTerms} color={`primary`}>terms and conditions</IonText> of findie</IonLabel>
@@ -130,4 +157,15 @@ export default PersonalInfoCard;
 
 export function viewTerms(){
   Plugins.Browser.open({url:`https://findieapp.web.app/terms`})
+}
+
+
+const validateCredentials=(array:string[])=>{
+    if(array.filter(val=>(!!val)).length === array.length){
+        return true
+    }
+    else{
+        return false
+    }
+
 }

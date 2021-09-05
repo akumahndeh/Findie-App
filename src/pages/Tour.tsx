@@ -1,36 +1,33 @@
 import React, { useState, useRef, useEffect } from "react"
-import { IonList, IonListHeader, IonSlides, IonSlide, IonIcon, IonText, IonSearchbar, IonLabel, IonCard, IonButton, IonTitle, IonGrid, IonRow, IonCol, IonImg, IonVirtualScroll, IonRippleEffect, IonLoading, useIonViewDidLeave, IonContent, IonPage, useIonViewDidEnter, useIonViewWillEnter, IonHeader, IonToolbar, IonFab, IonAvatar, IonItem, IonMenuButton, IonPopover, IonButtons, IonSpinner, CreateAnimation } from "@ionic/react"
-import { book, fastFood, cafeSharp, basketball, searchCircle, home, buildOutline, image, search, mapOutline } from "ionicons/icons";
-import { Classes, offices, sports, Docs, Restaurants, Others, All, Assets } from "../media/images/images";
-import { Link, useHistory, useLocation } from "react-router-dom";
-import "./Tour.css"
+import { useHistory } from "react-router-dom";
+import { IonList, IonSlides, IonSlide, IonIcon, IonText, IonCard, IonButton, IonTitle, IonVirtualScroll, IonRippleEffect, useIonViewDidLeave, IonContent, IonPage, useIonViewDidEnter, useIonViewWillEnter, IonHeader, IonToolbar, IonMenuButton, IonInfiniteScroll, IonInfiniteScrollContent, IonImg } from "@ionic/react"
+import { book, fastFood, cafeSharp, basketball, home, search, mapOutline, restaurant } from "ionicons/icons";
+import { Classes, offices, sports, Docs, Restaurants, Others, All } from "../media/images/images";
 import { HapticVibrate } from "../components/MapModal";
-import { Capacitor, Plugins } from "@capacitor/core";
-import ReactLinkify from "react-linkify";
-import { getStorage } from "./Info";
+import { Plugins } from "@capacitor/core";
 import TourInfo from "./TourInfo";
-import { Header } from "./Main";
 import TourSearchModal from "../components/TourSearchModal";
-import firebase from "firebase";
-import { HideTab } from "../App";
+import "./Tour.css"
+    ;
+import { IonFindieImg } from "../components/FindieImg";
 
 const Tour: React.FC = () => {
-    const [category, setcategory] = useState(All);
-    const [currentCategory, setcurrentCategory] = useState(Classes);
+    const [category, setcategory] = useState(Restaurants);
+    const [currentCategory, setcurrentCategory] = useState(Restaurants);
     const [hint, sethint] = useState(true);
-     const [openSearch, setopenSearch] = useState(false); 
-     const [loadspinner, setloadspinner] = useState(false);
+    const [openSearch, setopenSearch] = useState(false);
+    const [loadspinner, setloadspinner] = useState(false);
     const history = useHistory()
 
-    function closeSearch(){
+    function closeSearch() {
         setopenSearch(false)
     }
     useIonViewDidLeave(() => {
         sethint(false)
     })
-    var t:any,k:any;
-    
-   
+    var t: any, k: any;
+
+
 
     const searchValue = (event: any) => {
         const value = event.target.value.toLowerCase().replace(" ", "");
@@ -65,12 +62,12 @@ const Tour: React.FC = () => {
         return ""
     }
     useIonViewDidEnter(() => {
-        if( document.body.classList.contains(`dark`)){
+        if (document.body.classList.contains(`dark`)) {
             Plugins.StatusBar.setBackgroundColor({ color: `#152b4d` }).catch(console.log)
-           }else {
+        } else {
             Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
-           }
-             HapticVibrate()
+        }
+
     })
     useIonViewWillEnter(() => {
         Plugins.StatusBar.setOverlaysWebView({
@@ -84,26 +81,26 @@ const Tour: React.FC = () => {
                 <IonToolbar className={"tour-toolbar"} color="primary">
                     <IonMenuButton slot="start"></IonMenuButton>
                     <IonTitle>Tour</IonTitle>
-                          <IonButton slot={`end`} fill={`clear`} color={`light`} size={`large`} onClick={()=>{setopenSearch(true); HapticVibrate()}}>
-                             <IonIcon color={`light`} icon={search}/>
-                         </IonButton>
-                   </IonToolbar>
-              </IonHeader>
+                    <IonButton slot={`end`} fill={`clear`} color={`light`} size={`large`} onClick={() => { setopenSearch(true); HapticVibrate() }}>
+                        <IonIcon color={`light`} icon={search} />
+                    </IonButton>
+                </IonToolbar>
+            </IonHeader>
             <IonContent className={`tour-content`}>
-            <TourHeader getCategory={(cat: any) => { setcategory(cat); setcurrentCategory(cat); }} ></TourHeader>
-               
-                  <>
-                
-               <IonVirtualScroll style={{ overflowY: "scroll", marginBottom: "300px" }} items={All} >
-                    <ListBody   category={getcat()} place={category}></ListBody>
-                    <div style={{ height: `100px` }}></div>
-                </IonVirtualScroll>
-                
-                </> 
-             
-               <TourSearchModal  onDidDismiss={()=>closeSearch()}  isOpen={openSearch} ></TourSearchModal>
-             
-                </IonContent>
+                <TourHeader getCategory={(cat: any) => { setcategory(cat); setcurrentCategory(cat); }} ></TourHeader>
+
+                <>
+
+                    <IonVirtualScroll style={{ overflowY: "scroll", marginBottom: "300px" }} items={All} >
+                        <ListBody category={getcat()} place={category}></ListBody>
+                        <div style={{ height: `100px` }}></div>
+                    </IonVirtualScroll>
+
+                </>
+
+                <TourSearchModal onDidDismiss={() => closeSearch()} isOpen={openSearch} ></TourSearchModal>
+
+            </IonContent>
         </IonPage>
 
     )
@@ -117,7 +114,7 @@ export default Tour;
 const TourHeader: React.FC<{ getCategory: Function }> = (props) => {
     const selectColor = "danger"
     const init = { all: `medium`, class: "medium", rest: "medium", office: "medium", sport: "medium", doc: "medium", others: `medium` }
-    const [chipColor, setchipColor] = useState({ ...init, all: selectColor });
+    const [chipColor, setchipColor] = useState({ ...init, rest: selectColor });
     const tourslides = useRef<HTMLIonSlidesElement>(null)
     const getPlace = (value: number) => {
         if (value === 1) {
@@ -145,6 +142,7 @@ const TourHeader: React.FC<{ getCategory: Function }> = (props) => {
         else if (value === 6) {
             setchipColor({ ...init, doc: selectColor })
             props.getCategory(Docs)
+
         }
         else if (value === 7) {
             setchipColor({ ...init, others: selectColor })
@@ -156,7 +154,7 @@ const TourHeader: React.FC<{ getCategory: Function }> = (props) => {
     return (
         <IonToolbar className={`header-bar`}>
             <IonSlides className="tour-slides" ref={tourslides}
-                options={{ initialSlide: 0, speed: 200, spaceBetween: 10, centeredSlides: true, loop: false, slidesPerView: 2 }}>
+                options={{ initialSlide: 1, speed: 200, spaceBetween: 10, centeredSlides: true, loop: false, slidesPerView: 2 }}>
 
                 <IonSlide>
                     <IonButton fill="solid" onClick={() => getPlace(1)} color={chipColor.all} >
@@ -212,53 +210,39 @@ const TourHeader: React.FC<{ getCategory: Function }> = (props) => {
 
 
 const ListBody: React.FC<{ place: any[], category: string }> = (props) => {
-    const [tourData, settourData] = useState<any>();
 
-    const openInfo = (obj: any) => {
-        settourData({ pathname: `/tourInfo`, state: obj })
-    }
-    useEffect(() => {
 
-    }, [props]);
-    const [loading, setloading] = useState(false);
-    useIonViewDidLeave(() => {
-        setloading(false)
-    })
+
+
+
+
     return (
 
         <div className="ion-padding-top "  >
-            
-                   
-           <IonList>
-           {
-                props.place.map((item, index) => {
-                    return (
-                       
-                        
-                        <IonCard key={index} onClick={() => { openInfo({ ...props.place[index], "category": props.category }); HapticVibrate(); setloading(true) }} className="ion-margin tour-card ion-activatable ripple-parent">
-                            <DestinationImg item={item} />
-                            <IonRippleEffect></IonRippleEffect>
-                            <IonButton fill="outline" color="light" style={{ marginTop: "-40px" }} expand="block">{item.name}</IonButton>
-                        </IonCard>
-                       
-                       
-                    )
-                })
-            }
- 
-           </IonList>
+
+
+            <IonList>
+                {
+                    props.place.map((item, index) => {
+                        return (
+
+                            <PlaceCard  index={index} props={props} key={index} item={item} />
+                        )
+                    })
+                }
+
+            </IonList>
 
             {props.place.length <= 0 && <p>result not found... please check another category 😢</p>}
-            <TourInfo location={tourData} isOpen={tourData != undefined} onDidDismiss={() => { settourData(undefined) }} />
         </div>
 
     )
 }
 
-const DestinationImg: React.FC<{ item: any }> = ({ item }) => {
+const DestinationImg: React.FC<{ item: any, }> = ({ item }) => {
     const [loaded, setloaded] = useState(false);
     return (
-        <img onLoad={() => { setloaded(true) }} alt="" style={{ height: `200px`, transition: `0.6s` }} src={item.mainpic} />
+        <IonFindieImg className={``} style={{ height: `200px`, transition: `0.6s` }} src={item.mainpic} />
     )
 }
 
@@ -270,5 +254,21 @@ export function transformForSearch(text: string) {
     return text;
 }
 
+const PlaceCard: React.FC<{ item: any,props:any, index:number }> = ({ item,props,index }) => {
+    const [tourData, settourData] = useState<any>();
+    const openInfo = (obj: any) => {
+        settourData(obj)
+    }
 
+    return (
+        <>
+            <IonCard onClick={() => openInfo({ ...props.place[index], "category": props.category })} className="ion-margin tour-card ion-activatable ripple-parent">
+                <DestinationImg item={item} />
+                <IonRippleEffect></IonRippleEffect>
+                <IonButton fill="outline" color="light" style={{ marginTop: "-40px" }} expand="block">{item.name}</IonButton>
+            </IonCard>
+            {tourData&&<TourInfo placedata={tourData} isOpen={tourData != undefined} onDidDismiss={() => { settourData(undefined) }} />}
+        </>
+    )
+}
 

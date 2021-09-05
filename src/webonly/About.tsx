@@ -1,35 +1,48 @@
 import { Plugins } from "@capacitor/core";
-import { CreateAnimation, IonButton, IonButtons, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonLabel, IonPage, IonRow, IonSlide, IonSlides, IonTitle, IonToolbar, useIonViewDidEnter, useIonViewWillLeave } from "@ionic/react";
-import { book, chatboxEllipses, chatbubble, information, informationCircle, search } from "ionicons/icons";
-import React, { useEffect } from "react";
+import { CreateAnimation, IonButton, IonContent, IonFab, IonIcon, IonPage, IonSlide, IonSlides, useIonViewDidEnter, useIonViewWillLeave } from "@ionic/react";
+import { book, chatboxEllipses, informationCircle, search } from "ionicons/icons";
+import React, { useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router";
 import { HideTab } from "../App";
 import { HapticVibrate } from "../components/MapModal";
-import Pictures, { Classes } from "../media/images/images";
 import { getStorage } from "../pages/Info";
 import "./About.css";
 
+const { Storage } = Plugins
 const About: React.FC = () => {
-  let history= useHistory()
-  
-  function openLink(){
-    getStorage(`user`).then((res)=>{
-      if(res.value){
-        history.push(`/Guide`)
-         
-      }else{
-          Plugins.Storage.set({key:`firstTimer`,value:`noMore`}).then(()=>{
-              history.push(`/Guide`)
-               
-          })
-      }
-  })
+  let history = useHistory()
+  const slidesRef = useRef<HTMLIonSlidesElement>(null)
+
+
+  const [endOfSlide, setendOfSlide] = useState(false);
+
+  const slideChanged = async function () {
+    let activeIndex = (await slidesRef.current?.getActiveIndex())
+    if (activeIndex) {
+
+      setendOfSlide(activeIndex == 4 ? true : false)
+    }
   }
+  useEffect(() => {
+    initUser()
+  }, [])
+
+  async function initUser() {
+    const user = (await Storage.get({ key: `user` })).value
+    if (user) {
+      history.push(`/guide`)
+    }
+  }
+  useIonViewDidEnter(() => {
+    HideTab(true)
+  })
+  useIonViewWillLeave(() => {
+    HideTab(false)
+  })
   return (
     <IonPage>
       <IonContent className={`about-content`}>
-          <CreateAnimation play={true} duration={1400} fromTo={[{property:`transform`, fromValue:`scale(0.8)`, toValue:`scale(1)`},{property:`opacity`, fromValue:0, toValue:1}]}>
-          <IonSlides pager options={{ slidesPerView: 1 }} className={`slides`}>
+        <IonSlides onIonSlideTap={() => slidesRef.current?.slideNext()} onIonSlideDidChange={slideChanged} pager ref={slidesRef} options={{ slidesPerView: 1 }} className={`slides`}>
           <IonSlide >
             <div className="one">
               Findie Helps you know important facts about UB
@@ -68,14 +81,20 @@ const About: React.FC = () => {
             <div className="four">
               The university of buea in your hands
                       <div className="icon">
-                        <IonButton onClick={()=>{HapticVibrate(); openLink()}}>
-                          Go It
+                <IonButton routerLink={`/login`}>
+                  Go It
                         </IonButton>
-                      </div>
               </div>
+            </div>
           </IonSlide>
+
+
         </IonSlides>
-          </CreateAnimation>
+        {!endOfSlide && <IonFab vertical={`bottom`} horizontal={`center`}>
+          <IonButton style={{ marginTop: `-25vh` }} onClick={() => { slidesRef.current?.slideNext() }}>Next</IonButton>
+
+        </IonFab>}
+
       </IonContent>
     </IonPage>
   )

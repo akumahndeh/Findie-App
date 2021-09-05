@@ -1,11 +1,12 @@
-import { FilesystemDirectory, Plugins } from "@capacitor/core";
-import { IonBackButton, IonButton, IonButtons, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonInput, IonItem, IonLabel, IonPage, IonRow, IonSpinner, IonTextarea, IonTitle, IonToolbar, useIonViewDidEnter } from "@ionic/react";
-import firebase from "firebase";
-import { fileTray, paperPlaneSharp, reader } from "ionicons/icons";
 import React, { useEffect, useState } from "react"
+import { FilesystemDirectory, Plugins } from "@capacitor/core";
+import { IonBackButton, IonButton, IonButtons, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonImg, IonInput, IonItem, IonLabel, IonPage, IonRow, IonSpinner, IonTextarea, IonTitle, IonToolbar, useIonViewDidEnter, useIonViewWillEnter, useIonViewWillLeave } from "@ionic/react";
+import { fileTray, paperPlaneSharp, reader } from "ionicons/icons";
 import { HideTab } from "../../App";
 import { getStorage } from "../Info";
 import { authUser } from "./Guide";
+import firebase from "../../firebase/Firebase";;
+
 
 const Feedback: React.FC = () => {
     const [loading, setloading] = useState(false);
@@ -34,6 +35,12 @@ const Feedback: React.FC = () => {
         })
 
     }
+    useIonViewWillEnter(()=>{
+        HideTab(true)
+    })
+    useIonViewWillLeave(()=>{
+        HideTab(false)
+    })
     return (
         <IonPage>
             <IonHeader>

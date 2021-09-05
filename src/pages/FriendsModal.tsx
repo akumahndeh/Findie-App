@@ -1,11 +1,10 @@
-import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonList, IonModal, IonSpinner, IonTitle, IonToolbar } from "@ionic/react";
 import React, { useEffect, useState } from "react"; 
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonItem, IonModal, IonSpinner, IonTitle, IonToolbar } from "@ionic/react";
+import { refresh } from "ionicons/icons";
+import { getStorage, userInterface } from "./Info";
+import firebase from "../firebase/Firebase";
 import { DisplayReactionItem } from "./MenuPages/MyPost";
 import "./FriendsModal.css"
-import { getStorage, userInterface } from "./Info";
-import firebase from "firebase";
-import { Plugins } from "@capacitor/core/dist/esm/global";
-import { refresh } from "ionicons/icons";
 
 
 const FriendsModal:React.FC<{isOpen:boolean, onDidDismiss:Function}>=({isOpen,onDidDismiss})=>{
@@ -44,7 +43,7 @@ const FriendsModal:React.FC<{isOpen:boolean, onDidDismiss:Function}>=({isOpen,on
                             let temp:userInterface[]=Object.keys(snapshot.val()).map(key=>({...snapshot.val()[key],id:key}))
                            console.log(temp)
                             setFriends([...Friends,...temp])
-                            setlastId(temp[temp.length-1].id)
+                            setlastId(temp[temp.length-1].email)
                             // Plugins.Storage.set({key:`friends`,value:JSON.stringify(temp.slice(0,6))}).catch(console.log)
                         } 
                             setloading(false)

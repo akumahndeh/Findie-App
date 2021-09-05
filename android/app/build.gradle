@@ -6,8 +6,8 @@ android {
         applicationId "app.web.findieapp"
         minSdkVersion 21
         targetSdkVersion 30
-       versionCode 12
-        versionName "2.7"
+       versionCode 13
+        versionName "2.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

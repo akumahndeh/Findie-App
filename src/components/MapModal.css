@@ -1,5 +1,5 @@
 .map-content{
-    --background:url("../media/images/map.png");
+    --background:rgba(27, 135, 66, 0.516);
     backdrop-filter: blur(70px);
   
 

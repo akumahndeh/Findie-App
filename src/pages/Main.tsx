@@ -1,13 +1,16 @@
 import React, { useRef, useState, useEffect } from "react"
-import { IonPage, IonHeader, IonToolbar, IonMenuButton, IonTitle, IonIcon, IonAvatar, IonImg, IonSegmentButton, IonSegment, IonFooter, IonPopover, IonItem, useIonViewDidEnter, IonBadge, IonLabel, useIonViewWillEnter, IonButton } from "@ionic/react"
+import { IonPage, IonHeader, IonToolbar, IonMenuButton, IonTitle, IonIcon, IonAvatar, IonImg, IonSegmentButton, IonSegment, IonFooter, IonPopover, IonItem, useIonViewDidEnter, IonBadge, IonLabel, useIonViewWillEnter, IonButton, IonNote, IonButtons, IonRippleEffect, IonContent } from "@ionic/react"
 import "./Main.css"
 import { search, notifications, chatbox, book } from "ionicons/icons"
 import Tour from "./Tour"
-import { getStorage } from "./Info"
-import { Plugins  } from "@capacitor/core"
+import { getStorage, userInterface } from "./Info"
+import { Plugins } from "@capacitor/core"
 import { Assets } from "../media/images/images"
 import { Route, useHistory } from "react-router"
-import firebase from "firebase" 
+import firebase from "firebase"
+import { useSelector } from "react-redux"
+import { selectUser } from "../state/user-state"
+import LetterAvatar, { LetterAvatarBorderRadius } from "../components/letterAvatar"
 
 const Main: React.FC = () => {
     const slides = useRef<HTMLIonSlidesElement>(null)
@@ -18,53 +21,28 @@ const Main: React.FC = () => {
     const [, setloading] = useState(false);
     const [, setscrollContent] = useState(false);
 
-    let history=useHistory()
+    let history = useHistory()
     const slideTo = (value: number) => {
         slides.current?.slideTo(value)
         settitle(value === 0 ? "Guide" : value === 1 ? "Tour" : value === 2 ? "Gist" : "Info")
 
     }
-    useEffect(() => {
-        getStorage(`firstTimer`).then((res)=>{
-            if(res.value==`noMore`){
-                setloading(false)
-            }else{
-                Plugins.Storage.set({key:`firstTimer`,value:`noMore`}).then(()=>{
-                    history.push(`/Login`)
-                    setloading(false)
-                })
-            }
-        })
-      
-            Plugins.Storage.get({ key: "user" }).then((user) => {
-                if(user.value){
-                    setuser(JSON.parse(user.value + ""))
-                    setisAuth(true)
-                }else{
-                    setisAuth(false)
-                    firebase.auth().signInAnonymously()
-
-                }
-               
-            })
-          
-    }
-        , [])
-
     
-    useIonViewDidEnter(()=>{
-        Plugins.StatusBar.setBackgroundColor({color:`#0d2c6d`}).catch(console.log)
-     })
-    useIonViewWillEnter(()=>{
+
+
+    useIonViewDidEnter(() => {
+        Plugins.StatusBar.setBackgroundColor({ color: `#0d2c6d` }).catch(console.log)
+    })
+    useIonViewWillEnter(() => {
         Plugins.StatusBar.setOverlaysWebView({
             overlay: false
-          }).catch(()=>{});
+        }).catch(() => { });
     })
-     
+
 
     return (
         <IonPage>
-            <Route path={`/`} component={Tour}/>
+            <Route path={`/`} component={Tour} />
             {/* <IonContent>
                 <IonLoading spinner={`lines`} message={`initializing`} isOpen={loading} onDidDismiss={()=>{setloading(false)}}/>
                 <IonSlides options={{initialSlide:1}} onIonSlideDidChange={slideChange} draggable={false} style={{ height: "100vh" }} className="page-slides" ref={slides}>
@@ -96,42 +74,38 @@ const Main: React.FC = () => {
 }
 export default Main;
 
-export const Header: React.FC<{ title: string, user: any }> = props => {
-    const [image, setimage] = useState(Assets.logo);
+export const Header: React.FC<{ title: string, user: any, label: string }> = props => {
     const [popover, setpopover] = useState(false);
-    function restoreImage() {
-        Plugins.Storage.get({ key: "user" }).then(data => {
-          try{ 
-            if(data.value){
-            let value = JSON.parse(data.value + "")
-               if(value?.image){
+    const user: userInterface = useSelector(selectUser)
 
-                setimage(value.image)
-            } }
-        }catch{}
-        })
-    }
-    useEffect(() => {
-       restoreImage()
-      
-    }, []);
-    useIonViewDidEnter(()=>{
-        
-    })
+
     return (
         <IonHeader mode={`md`}>
-            <IonToolbar color="primary">
+            <IonToolbar className={`app-header`} color="primary">
                 <IonMenuButton slot="start"></IonMenuButton>
-                <IonTitle>{props.title}</IonTitle>
-                <IonAvatar style={image==Assets.logo?{background:`white`}:{}} onClick={() => setpopover(true)} className="profile-ava" slot="end">
-                    <IonImg alt="" src={image}></IonImg>
-                   </IonAvatar>
+
+                <IonTitle>{props.title}   {props.label != `` && <IonLabel> ({props.label}) </IonLabel>}</IonTitle>
+                {user.image && <IonAvatar onClick={() => setpopover(true)} className="profile-ava" slot="end">
+                    <IonImg alt="" src={user.image}></IonImg>
+                </IonAvatar>}
+                {!user.image && user.username && <div onClick={() => setpopover(true)} className={`letter-avatar ion-activatable ripple-parent`} style={{ width: `50px` }}>
+                    <LetterAvatar props={{ name: user.username, size: `50` }} />
+                    <IonRippleEffect type="unbounded"></IonRippleEffect>
+                </div>}
+
             </IonToolbar>
             <IonPopover isOpen={popover} onDidDismiss={() => setpopover(false)} >
-                <img alt="" src={image} />
-                <IonItem>
-                    <IonButton fill={`clear`} onClick={() => setpopover(false)} routerLink="/Profile">view profile</IonButton>
-                </IonItem>
+                {user.image && <img alt="" src={user.image} />}
+                <IonContent>
+                    {!user.email && user.username && <IonToolbar >
+                        <div style={{ width: `100px`, margin: `40px auto` }}>
+                            <LetterAvatarBorderRadius props={{ borderRadius: 20, name: user.username, size: 100 }} />
+                        </div>
+                    </IonToolbar>}
+                    <IonItem>
+                        <IonButton fill={`clear`} onClick={() => setpopover(false)} routerLink="/Profile">view profile</IonButton>
+                    </IonItem>
+                </IonContent>
             </IonPopover>
         </IonHeader>
     )
@@ -144,25 +118,25 @@ const MainFooter: React.FC<{ Page: Function, slideIndex: number }> = (props) => 
     const infoBut = useRef<HTMLIonSegmentButtonElement>(null)
     const gistBut = useRef<HTMLIonSegmentButtonElement>(null)
     const segment = useRef<HTMLIonSegmentElement>(null)
-     const [notifArray, setnotifArray] = useState<any[]>([]);
+    const [notifArray, setnotifArray] = useState<any[]>([]);
     useEffect(() => {
         if (props.slideIndex == 0)
             setvalue(`home`)
         else if (props.slideIndex == 1)
-           setvalue(`tour`)
+            setvalue(`tour`)
 
         else if (props.slideIndex == 2)
             setvalue(`gist`)
         else if (props.slideIndex == 3)
-          setvalue(`info`)
-           
+            setvalue(`info`)
+
 
 
     }, [props.slideIndex])
     const segmentChange = () => {
         let val = segment.current?.value
-        if(val)
-        setvalue(val)
+        if (val)
+            setvalue(val)
         if (val == "home")
             props.Page(0)
         else if (val == "tour")
@@ -174,19 +148,12 @@ const MainFooter: React.FC<{ Page: Function, slideIndex: number }> = (props) => 
 
     }
     useEffect(() => {
-           if(value==`gist` && notifArray.length>0){
-                  setnotifArray([])
-           }
+        if (value == `gist` && notifArray.length > 0) {
+            setnotifArray([])
+        }
     }, [value]);
-    // Plugins.LocalNotifications.addListener(`localNotificationReceived`,(notif)=>{
-    //      setnotifArray([...notifArray,notif]) 
-    // })
-   useEffect(() => {
-       
-    Plugins.LocalNotifications. areEnabled().then((notif)=>{
-        setnotifArray([...notifArray,notif]) 
-   })
-   }, []);
+
+
     return (
         <IonFooter >
             <IonToolbar color="primary">
@@ -199,13 +166,13 @@ const MainFooter: React.FC<{ Page: Function, slideIndex: number }> = (props) => 
                         <IonIcon icon={search}></IonIcon>
 
                     </IonSegmentButton>
-                   
+
                     <IonSegmentButton value="gist" ref={gistBut}>
                         <IonIcon icon={chatbox}></IonIcon>
-                  {notifArray.length>0&& <IonBadge color={`danger`} ><IonLabel>{notifArray.length}</IonLabel></IonBadge>}
-                    
+                        {notifArray.length > 0 && <IonBadge color={`danger`} ><IonLabel>{notifArray.length}</IonLabel></IonBadge>}
+
                     </IonSegmentButton>
-                     <IonSegmentButton value="info" ref={infoBut}  >
+                    <IonSegmentButton value="info" ref={infoBut}  >
                         <IonIcon icon={notifications}></IonIcon>
 
                     </IonSegmentButton>
@@ -221,10 +188,10 @@ const MainFooter: React.FC<{ Page: Function, slideIndex: number }> = (props) => 
 
 
 
-/**  
- * 
- * 
- * 
+/**
+ *
+ *
+ *
        <IonModal swipeToClose mode="ios" isOpen={props.isOpen} onDidDismiss={props.onDidDismiss}>
 
                 <IonContent ref={content} scrollY style={{ position: "relative" }} color="dark" scrollX>
@@ -243,7 +210,7 @@ const MainFooter: React.FC<{ Page: Function, slideIndex: number }> = (props) => 
                         { offset: 1, transfrom: "scale(1)", opacity: 1, background: "purple" }]}
                     >
                         <div className="markercircle" style={{ top: `${offset?.y}px`, left: `${offset?.x}px` }}></div>
-                    </CreateAnimation>  
+                    </CreateAnimation>
                     <div className="marker" style={{ top: `${offset?.y - 40}px`, left: `${offset?.x - 40}px` }}>
                     <div className="arrow"></div>
                     <div className="pin" onClick={() => { setlocationToast(`choosen Destination`); setpopImg(true) }}></div>
@@ -277,25 +244,25 @@ const MainFooter: React.FC<{ Page: Function, slideIndex: number }> = (props) => 
                       <IonItem>
                                 <IonText>distance from choosen location</IonText>
                              <IonItem lines={`none`}>
-                             <h4>{ convertScale(distance)}</h4> 
+                             <h4>{ convertScale(distance)}</h4>
                              </IonItem>
                           </IonItem>
                           <IonItem>
                              <IonText>Current Status</IonText>
                              <IonItem lines={`none`}>
-                             <h4>{outofRange? `out of campus`:`on campus`}</h4> 
+                             <h4>{outofRange? `out of campus`:`on campus`}</h4>
                              </IonItem>
                           </IonItem>
                           <IonItem>
                              <IonText>Destination</IonText>
                              <IonItem lines={`none`}>
-                              <h4 style={{textTransform:`capitalize`}}>{props.placename}</h4> 
+                              <h4 style={{textTransform:`capitalize`}}>{props.placename}</h4>
                              </IonItem>
                             </IonItem>
                             <IonItem>
                              <IonText>Estimated time to destination</IonText>
                              <IonItem lines={`none`}>
-                              <h4 style={{textTransform:`capitalize`}}>{ getUserTime(userLocation?.coords.speed,distance)}</h4> 
+                              <h4 style={{textTransform:`capitalize`}}>{ getUserTime(userLocation?.coords.speed,distance)}</h4>
                              </IonItem>
                             </IonItem>
                             <IonToolbar className={`speedo`}>
@@ -332,7 +299,7 @@ return (<>
 <IonFab style={{transform:`translateY(100px)`}} horizontal="end" vertical="center">
         <IonFabButton onClick={() => { viewstats() }} color="light">
             <IonIcon icon={barChart}></IonIcon>
-        </IonFabButton> 
+        </IonFabButton>
 </IonFab>
 <IonFab  horizontal="end" vertical="center">
     <IonFabButton>
@@ -409,11 +376,11 @@ console.log(angle)
 return angle
 }
 return -90
-}* 
- * 
- * 
- * 
- * 
+}*
+ *
+ *
+ *
+ *
 
 
 
@@ -421,5 +388,5 @@ return -90
 
 
 
- * 
- * */ 
+ *
+ * */

@@ -55,3 +55,16 @@ div.gist-container
     height: 400px;
     
  }
+
+ .app-header{
+    position:relative
+ }
+
+ 
+ .app-header .letter-avatar{
+
+     position: absolute;
+     top:4px;
+     right:5px;
+     transform: scale(0.8);
+ }

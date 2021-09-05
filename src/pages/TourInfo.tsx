@@ -1,13 +1,15 @@
-import { Plugins } from "@capacitor/core";
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonButton, IonItemDivider, IonText, IonImg, IonSpinner, IonButtons, IonModal, IonIcon, IonBackdrop } from "@ionic/react";
-import firebase from "firebase";
-import { arrowBack } from "ionicons/icons";
 import React, { useEffect, useState } from "react"
+
+import { Plugins } from "@capacitor/core";
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonCard, IonButton, IonItemDivider, IonText, IonImg, IonSpinner, IonButtons, IonModal, IonIcon, IonBackdrop, IonCardContent } from "@ionic/react";
+import { arrowBack } from "ionicons/icons";
 import MapModal from "../components/MapModal";
 import ViewPicture from "../components/ViewPicture";
 import Pictures, { Assets } from "../media/images/images";
 import { getStorage } from "./Info";
 import "./Tour.css"
+import firebase from "../firebase/Firebase"; import { IonFindieImg } from "../components/FindieImg";
+;
 
 interface TourInfoInterface {
     name: string,
@@ -17,19 +19,19 @@ interface TourInfoInterface {
         x: number,
         y: number
     },
-    category: string
+    category: string,
+    about: string,
+    type: string
 
 }
-const TourInfo: React.FC<{ onDidDismiss: Function, isOpen: boolean, location: any | undefined }> = ({ location, isOpen, onDidDismiss }) => {
+const TourInfo: React.FC<{ onDidDismiss: Function, isOpen: boolean, placedata: TourInfoInterface }> = ({ isOpen, onDidDismiss, placedata }) => {
 
-    const [openMapModal, setopenMapModal] = useState(false);
-    const [placedata, setplacedata] = useState<TourInfoInterface | any>();
     const [Images, setImages] = useState<string[]>([]);
     const [currentImg, setcurrentImg] = useState(``);
     const content = React.useRef<HTMLIonContentElement>(null)
     const [loadingImages, setloadingImages] = useState(true);
     const [OfflineImages, setOfflineImages] = useState<string[]>([]);
-
+    const [openMapModal, setopenMapModal] = useState(false)
 
 
     const openMap = () => {
@@ -46,12 +48,13 @@ const TourInfo: React.FC<{ onDidDismiss: Function, isOpen: boolean, location: an
         }
 
     }, [placedata])
-    useEffect(() => {
-        if (location) {
-            setplacedata(location?.state)
-        }
 
-    }, [location]);
+    // useEffect(() => {
+    //     if (location) {
+    //         setplacedata(location?.state)
+    //     }
+
+    // }, [location]);
 
 
     function getImages(path: string) {
@@ -105,14 +108,20 @@ const TourInfo: React.FC<{ onDidDismiss: Function, isOpen: boolean, location: an
                     <div className="ion-padding">
                         <label >
                             {
-                                placedata?.about
+                                placedata.about
                             }
                         </label>
                     </div>
                     <IonItemDivider color="none">
+                        <IonText color="primary" style={{ fontSize: "20px" }}>Video Tour</IonText>
+                    </IonItemDivider>
+                    <div className={`tour-video`}>
+                        <iframe allowFullScreen src="https://www.youtube.com/embed/GGE0xIhwe7Y" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" ></iframe>
+                    </div>
+                    <IonItemDivider color="none">
                         <IonText color="primary" style={{ fontSize: "20px" }}>Images</IonText>
                     </IonItemDivider>
-                    <IonImg alt="" onClick={() => setcurrentImg(placedata?.mainpic)} style={{ height: "300px", margin: "6px" }} src={placedata?.mainpic}></IonImg>
+                    <img alt="" onClick={() => setcurrentImg(placedata?.mainpic)} style={{ height: "300px", margin: "6px" }} src={placedata?.mainpic}></img>
                     {
                         Images?.map((img, index) => {
                             return <div key={index}>
@@ -149,25 +158,27 @@ export const DownloadedImg: React.FC<{ img: string, getImage: Function, path: st
 
     }, [img]);
 
-   async function updateImage(){
-        let imageurl= (await getStorage(path + "/" + img)).value
-        if(imageurl){
-           setimage(imageurl)
-        }else{
+    async function updateImage() {
+        let imageurl = (await getStorage(path + "/" + img)).value
+        if (imageurl) {
+            setimage(imageurl)
+        } else {
             firebase.storage().ref().child(path + "/" + img).getDownloadURL()
-            .then(url => {
-                setimage(url)
-                console.log(`fetching`)
-                Plugins.Storage.set({key:path + "/" + img, value:url})
-                
-            })
+                .then(url => {
+                    setimage(url)
+                    console.log(`fetching`)
+                    Plugins.Storage.set({ key: path + "/" + img, value: url })
+
+                })
         }
 
     }
     return (
         <>
             <div style={{ height: "300px", textAlign: "center", padding: "6px" }}>
-                {image == "" ? <IonSpinner color="primary" /> : <IonImg onClick={() => { getImage(image) }} src={image == `` ? Assets.loading : image} />}
+                {image == "" ? <IonSpinner color="primary" /> : <div onClick={() => { getImage(image) }} >
+                    <IonFindieImg src={image == `` ? Assets.loading : image} style={{} } className={``}></IonFindieImg>
+                </div>}
             </div>
         </>
 

@@ -3,9 +3,10 @@ import { IonHeader, IonToolbar, IonIcon, IonTitle, IonContent, IonCard, IonCardC
 import { arrowBack, cameraSharp, crop, imagesSharp } from "ionicons/icons";
 import { Plugins, CameraOptions, CameraResultType, CameraSource } from "@capacitor/core"
 import "./GistModal.css"
-import firebase from "firebase";
+import firebase from "../firebase/Firebase";
 import { HapticVibrate } from "./MapModal";
 import { getStorage, userInterface } from "../pages/Info";
+import { FindieImg } from "./FindieImg";
 
 const { Camera } = Plugins
 
@@ -38,7 +39,7 @@ const CreateGist: React.FC<{ openModal: boolean, closeModal: Function, jobDone: 
     const [contactme, setcontactme] = useState(false);
     const [animateText, setanimateText] = useState(false);
     const [RandomlyView, setRandomlyView] = useState(Math.ceil(Math.random() * 100) % 2 == 0);
-     
+
 
 
     useEffect(() => {
@@ -64,7 +65,7 @@ const CreateGist: React.FC<{ openModal: boolean, closeModal: Function, jobDone: 
         let detail = event.detail
         if (detail.checked) {
             Plugins.Storage.set({ key: `contactme`, value: detail.checked })
-            
+
         } else {
             Plugins.Storage.remove({ key: `contactme` })
 
@@ -72,10 +73,10 @@ const CreateGist: React.FC<{ openModal: boolean, closeModal: Function, jobDone: 
         setcontactme(detail.checked)
 
     }
-    function clickPicker(){
+    function clickPicker() {
         pickerRef.current?.click()
     }
-    
+
     const takeImage = async (option: CameraOptions) => {
         try {
             const image = await Camera.getPhoto(option)
@@ -84,26 +85,26 @@ const CreateGist: React.FC<{ openModal: boolean, closeModal: Function, jobDone: 
             alert(err)
         }
     }
-    
-function getMultipleImages(element:any){
-    let files:Blob[]=  Array.from( element.target?.files )
-   
-    Promise.all(files.map((file:Blob)=>{
-        return( new Promise((resolve,reject)=>{
-            
-            let reader= new FileReader()
-       reader.addEventListener(`load`,(ev)=>{
-           resolve(ev.target?.result)
-       })
-       reader.addEventListener(`error`, reject)
-       reader.readAsDataURL(file)
-      
-        }))
-    })).then(res=>{
-       setimages( res)
-    })
- }
-  
+
+    function getMultipleImages(element: any) {
+        let files: Blob[] = Array.from(element.target?.files)
+
+        Promise.all(files.map((file: Blob) => {
+            return (new Promise((resolve, reject) => {
+
+                let reader = new FileReader()
+                reader.addEventListener(`load`, (ev) => {
+                    resolve(ev.target?.result)
+                })
+                reader.addEventListener(`error`, reject)
+                reader.readAsDataURL(file)
+
+            }))
+        })).then(res => {
+            setimages(res)
+        })
+    }
+
     useEffect(() => {
         if (images.length > 0) {
             divRef.current?.scrollTo({ behavior: `smooth`, top: 1000 * images.length })
@@ -141,6 +142,7 @@ function getMultipleImages(element:any){
         }
 
         let gist: any = {
+
             userid: userid,
             message: message,
             date: dateString,
@@ -153,44 +155,55 @@ function getMultipleImages(element:any){
         }
         setposting(true)
         let id = Math.random() + ``
-        let uploadableImages=images
+        let uploadableImages = images
         setimages([])
-        let SelectedImages =uploadableImages.length > 0 ?uploadableImages : undefined
+        let SelectedImages = uploadableImages.length > 0 ? uploadableImages : undefined
         closeModal({ ...gist, email: `false`, id, images: SelectedImages })
+        const imageURLs: any[] = []
 
         setposting(false)
         setprogress(false)
+        const uploadRef = firebase.storage()
         if (user) {
-            firebase.database().ref(`/gists`).child(user?.faculty).push(gist).then((result) => {
+            firebase.database().ref(`/FindieGists`).child(user?.faculty).push(JSON.stringify(gist)).then((result) => {
 
                 if (result) {
                     let key = result.key
 
-                    let imageRefs =uploadableImages.map((img, index) => {
-                        return `gists/${user?.faculty}/${key}/image${index}`
+                    let imageRefs = uploadableImages.map((img, index) => {
+                        return `FindieGists/${user?.faculty}/${key}/image${index}`
                     })
-                   uploadableImages.forEach((imgurl, index) => {
+
+                    for (let i = 0; i < imageRefs.length; i++) {
+                        let imgurl = uploadableImages[i]
                         fetch(imgurl).then(async (res) => {
                             let blobimg = await res.blob()
-                            firebase.storage().ref(imageRefs[index]).put(blobimg).then(() => {
-
+                            uploadRef.ref(imageRefs[i]).put(blobimg).then(async (res) => {
                                 setprogress(true)
+                                let url = await uploadRef.ref(imageRefs[i]).getDownloadURL()
+                                if (url) {
+                                    imageURLs.push(url)
+                                }
+                                if (imageURLs.length == uploadableImages.length) {
+                                    if (key) {
+                                        firebase.database().ref(`FindieGists/${user?.faculty}`).child(key + ``).set(JSON.stringify({ ...gist, images: imageURLs })).then(() => {
+                                            setposting(false)
+                                            console.log(`done posting`)
+                                            jobDone({ id, done: true });
+                                            Plugins.Toast.show({ text: `Post Sent`, duration: `short`, position: `center` }).then(() => {
+                                            })
+
+                                        }).catch((err) => alert(err.message))
+
+                                        firebase.database().ref(`/FindieGistIndex`).child(user?.faculty).child(key).set(userid)
+                                    }
+                                }
                             })
+
                         })
-                    })
-
-                    if (key) {
-                          firebase.database().ref(`gists/${user?.faculty}`).child(key + ``).set(JSON.stringify({ ...gist, images: imageRefs })).then(() => {
-                            setposting(false)
-                            console.log(`done posting`)
-                            jobDone({ id, done: true });
-                            Plugins.Toast.show({ text: `Post Sent`, duration: `short`, position: `center` }).then(() => {
-                               })
-
-                        }).catch((err) => alert(err.message))
-
-                        firebase.database().ref(`/gistIndex`).child(user?.faculty).child(key).set(userid)
                     }
+
+
                 }
             })
 
@@ -210,7 +223,7 @@ function getMultipleImages(element:any){
                 </IonToolbar>
             </IonHeader>
             <IonPopover isOpen={removeImage != -1} onDidDismiss={() => setremoveImage(-1)}>
-                <img src={images[removeImage]} alt="" />
+                <FindieImg src={images[removeImage]} style={{}} className={``} />
                 <IonItem lines={`none`}>
                     <IonButton onClick={cancelremove} fill={`clear`}>cancel</IonButton>
                     <IonButtons slot={`end`}>
@@ -223,26 +236,28 @@ function getMultipleImages(element:any){
                 {RandomlyView ? <div className="ion-padding ion-margin gist-intro">
                     <CreateAnimation play={animateText} stop={!animateText} delay={400} duration={2000} fromTo={[{ fromValue: 0, toValue: 1, property: `opacity` }]}>
                         <IonLabel style={{ opacity: 0 }}>
-                           Share <b>Sensational</b> Pictures, Make someone <b>Laugh</b>, <b>Advertise</b> your Products,  share an <b>Opportunity</b>, post something <b>Amazing</b>
-                    </IonLabel>
+                            Share <b>Sensational</b> Pictures, Make someone <b>Laugh</b>, <b>Advertise</b> your Products,  share an <b>Opportunity</b>, post something <b>Amazing</b>
+                        </IonLabel>
                     </CreateAnimation>
-                    
-                </div>:<div style={{height:`20%`}}>
-                    
-                    </div>}
+
+                </div> : <div style={{ height: `20%` }}>
+
+                </div>}
                 <IonCard mode={`ios`}>
                     <IonItem mode={`md`} lines={`none`}>
                         <IonText>
-                             <IonNote>allow people to contact me from this post</IonNote>
-                          </IonText>
+                            <IonNote>allow people to contact me from this post</IonNote>
+                        </IonText>
                         <IonCheckbox slot={`end`} onIonChange={updateContactMe} checked={contactme}  ></IonCheckbox>
                     </IonItem>
                     <IonCardContent>
-                       {images.length>0&& <div ref={divRef} style={{ overflowY: `scroll`, width: `100%`, height: `210px` }} >
+                        {images.length > 0 && <div ref={divRef} style={{ overflowY: `scroll`, width: `100%`, height: `210px` }} >
 
                             {
                                 images.map((img, index) => <IonSlide key={index}>
-                                    <img onClick={() => setremoveImage(index)} alt="" src={img}/>
+                                    <div onClick={() => setremoveImage(index)}>
+                                        <FindieImg src={img} style={{}} className={``} />
+                                    </div>
                                 </IonSlide>)
                             }
                         </div>}
@@ -258,14 +273,16 @@ function getMultipleImages(element:any){
                                     <IonIcon size="large" icon={cameraSharp}></IonIcon>
                                 </IonButton>
                                 <span className="ion-padding"> </span>
-                                <IonButton disabled={posting} mode={`md`} onClick={() => {takeImage({ ...galleryOption })}}  size="large">
+                                <IonButton disabled={posting} mode={`md`} onClick={() => { takeImage({ ...galleryOption }) }} size="large">
                                     <IonIcon size="large" icon={imagesSharp}></IonIcon>
                                 </IonButton>
-                                
+
                                 <span className="ion-padding"> </span>
-                                <IonButton disabled={posting} mode={`md`} onClick={() => {takeImage({ ...galleryOption, allowEditing: true });
-                                 Plugins.Toast.show({text:`Does not work properly on some devices`, duration:`long`, position:`center`})}}
-                                  size="large">
+                                <IonButton disabled={posting} mode={`md`} onClick={() => {
+                                    takeImage({ ...galleryOption, allowEditing: true });
+                                    Plugins.Toast.show({ text: `Does not work properly on some devices`, duration: `long`, position: `center` })
+                                }}
+                                    size="large">
                                     <IonIcon size="large" icon={crop}></IonIcon>
                                 </IonButton>
                                 <span className="ion-padding"> </span>

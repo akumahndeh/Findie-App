@@ -22,7 +22,7 @@ const TeacherAdmin:React.FC=()=>{
         HideTab()
     })
   useEffect(() => {
-auththisUser()
+    auththisUser()
   setHero()
 },  []);
 
@@ -58,7 +58,7 @@ function updateData(){
 
 function auththisUser(){
     let state:any=location.state 
-     let currentUser:{faculty:string,email:string}=state
+      let currentUser:{faculty:string,email:string}=state
      console.log(currentUser)
      setauthTeacher(currentUser)
 }

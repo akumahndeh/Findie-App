@@ -124,7 +124,7 @@ ion-img.post-img{
 }
 
 .popover-img{
-   height: 150px;
+   height: 50vh;
    object-fit: cover;
    width: 100%;
 }
@@ -154,7 +154,7 @@ ion-img.no-post.two{
   grid-template-columns: auto auto;
   max-height: 90%;
   min-height: 300px;
-  backdrop-filter:blur(1px);
+  /* backdrop-filter:blur(1px); */
 
 }
 ion-button.nopost-btn{
@@ -194,4 +194,26 @@ ion-toast.network-toast{
   --ion-color-danger:rgb(184, 72, 72);
    
    
+}
+
+.mates-profile{
+   padding-top: 20vh;
+
+}
+mates-profile ion-content{
+   background: transparent;
+   position: relative;
+}
+
+.mates-profile  ion-toolbar{ 
+  --background: transparent;
+  position: fixed;
+
+}
+.mates-profile  div.header-img-con{
+  background-color: black;
+}
+.mates-profile ion-img{
+   
+   opacity: 0.7;
 }

@@ -1,6 +1,6 @@
 import { CameraResultType, Capacitor, Filesystem, FilesystemDirectory, Plugins, PushNotification, PushNotificationToken } from "@capacitor/core";
-import { IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonHeader, IonIcon, IonImg, IonInput, IonItem, IonLabel, IonLoading, IonModal, IonPage, IonTitle, IonToolbar, useIonViewDidEnter } from "@ionic/react"
-import firebase from "firebase"
+import { IonAvatar, IonButton, IonButtons, IonCard, IonCardContent, IonContent, IonHeader, IonIcon, IonImg, IonInput, IonItem, IonLabel, IonLoading, IonModal, IonPage, IonTitle, IonToolbar, useIonViewDidEnter, useIonViewWillLeave } from "@ionic/react"
+import firebase from "../firebase/Firebase";
 import { add, chevronBack, logoGoogle, personAdd } from "ionicons/icons";
 import React, { useEffect, useState } from "react" 
 import { HideTab } from "../App";
@@ -26,7 +26,8 @@ const Teacher: React.FC = () => {
     function signin() {
         let provider = new firebase.auth.GoogleAuthProvider
        setauthing(true)
-        firebase.auth().signInWithPopup(provider).then(result => {
+ 
+       firebase.auth().signInWithPopup(provider).then(result => {
             let email = result.user?.email
 
             firebase.firestore().collection(`teachers`).where(`email`, `==`, email).get()
@@ -126,7 +127,12 @@ const Teacher: React.FC = () => {
          
         }
     }
-  
+    useIonViewDidEnter(() => {
+        HideTab(true)
+      })
+      useIonViewWillLeave(() => {
+        HideTab(false)
+      })
     
     return (
         <IonPage>

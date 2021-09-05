@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react"
 import { IonCard, IonCardHeader, IonCardContent, IonItem, IonLabel, IonInput, IonButton, IonCardTitle, IonText, IonCheckbox } from "@ionic/react"
 import { Plugins } from "@capacitor/core"
-import firebase from "firebase"
+import firebase from "../firebase/Firebase"
 
 
 const BusinessCard:React.FC=()=>{
