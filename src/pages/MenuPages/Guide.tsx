@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react"
 import { IonHeader, IonToolbar, IonTitle, IonGrid, IonRow, IonCol, IonItem, IonLabel, IonNote, IonSearchbar, IonSkeletonText, useIonViewDidEnter, IonContent, IonIcon, IonButton, IonBackdrop, IonSpinner } from "@ionic/react"
 import "./Guide.css"
-import firebase from "../../firebase/Firebase";
-import { Capacitor, Plugins } from "@capacitor/core"
-import { getStorage } from "../Info"
+import firebase, { db } from "../../firebase/Firebase";
+import { App, Capacitor, Plugins } from "@capacitor/core"
+import { getStorage, userInterface } from "../Info"
 import { useHistory } from "react-router"
 import GuideInfo from "../GuideInfo"
 import { arrowBack } from "ionicons/icons"
 import { HapticVibrate } from "../../components/MapModal"
+import { useSelector } from "react-redux";
+import { selectUser } from "../../state/user-state";
 
 export interface GuideInterface {
     title: string,
@@ -21,7 +23,16 @@ const Guide: React.FC = () => {
     const [selectedGuide, setselectedGuide] = useState<any>();
     const [refreshing, setrefreshing] = useState(false);
     const [displayContent, setdisplayContent] = useState(false);
-    
+    const user: userInterface = useSelector(selectUser)
+    const history = useHistory()
+
+    useEffect(() => {
+        if (!user) {
+            history.push(`/login`)
+        }
+
+    }, [user])
+
     useIonViewDidEnter(() => {
         if (document.body.classList.contains(`dark`)) {
             Plugins.StatusBar.setBackgroundColor({ color: `#152b4d` }).catch(console.log)
@@ -62,7 +73,7 @@ const Guide: React.FC = () => {
     }
     function LoadGuideFromDatabase() {
         setrefreshing(true)
-      
+
         firebase.database().ref('guide').once("value", (snapshot) => {
             let value = snapshot.val()
             if (value) {
@@ -71,7 +82,7 @@ const Guide: React.FC = () => {
                 setGuideList(Object.values(value).map((item) => JSON.parse(item + ``)))
                 Plugins.Storage.set({ key: `guide`, value: JSON.stringify(value) })
             }
-            
+
             setrefreshing(false)
 
         }, () => {
@@ -82,25 +93,18 @@ const Guide: React.FC = () => {
         ExitApp()
 
     }, []);
-    // firebase.performance()
-    var starttime = 0
+   
     function ExitApp() {
 
         if (Capacitor.isNative) {
-            Plugins.App.addListener(`backButton`, async () => {
-                if (window.location.pathname === `/` && starttime == 0) {
-                    Capacitor.Plugins?.Toast.show({ text: `press back again to exit` })
-                    starttime = Date.now()
-                }
-                else if (window.location.pathname === `/` && Math.abs(Date.now() - starttime) <= 2000) {
-                    ExitGesture()
-                    starttime = 0
-                }
-                else {
-                    starttime = 0
-                }
-
-            })
+            document.addEventListener('ionBackButton', async (ev: any) => {
+                ev.detail.register(-1, () => {
+                    const path = window.location.pathname;
+                    if (path === `/` || path == `/guide` || path == `/login` || path == `/signup`) {
+                        App.exitApp();
+                    }
+                });
+            });
         }
 
 

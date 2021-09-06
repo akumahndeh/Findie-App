@@ -42,7 +42,7 @@ const PersonalInfoCard: React.FC<{ getUserInfo: Function }> = (props) => {
        await fstore.collection(`users`).doc(user.email).set(user)
        Storage.set({ key: `user`, value: JSON.stringify(user) }) 
        Storage.set({ key: "userid", value: user.email })
-       history.push(`/guide`)
+       history.push(`/about`)
        dispatch(update_user(user))
        setloading(false)
       }

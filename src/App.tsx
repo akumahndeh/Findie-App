@@ -128,7 +128,7 @@ const App: React.FC = () => {
             {/* <Route exact path="/gist" render={() => <IonPage><Header label={`${getShortName(user?.faculty)}`} title={`Gist`} user={{}} />{isAuth ? <Gist /> : <Home />}</IonPage>} /> */}
             {/* <Route exact path="/info" render={() => <IonPage><Header  label={``} title={`Info`} user={{}} />{user.email ? <Info user={{}} /> : <Home />}</IonPage>} /> */}
             {/* <Route exact path="/info" render={() => <IonPage><Header label={``} title={`Info`} user={{}} /><Info /></IonPage>} /> */}
-            <Redirect exact from="/" to={`/about`} />
+            <Redirect exact from="/" to={`/guide`} />
             <Route path="/Profile" component={Profile} exact />
             <Route path="/recommend" component={Recommended} exact />
             <Route path="/feedback" component={Feedback} exact />

@@ -53,17 +53,19 @@ const Recommended: React.FC = () => {
         }))
 
 
-        fstore.collection(`recommended-analytics`).doc(user.faculty).collection(`available`).onSnapshot((snapshot => {
-            const docs: any = snapshot.docs.map(doc => doc.data())
-
-            setloading(false)
-            if (docs.length <= 0) {
-                setnoData(true)
-                return
-            }
-            setnoData(false)
-            setrecommendedData([...recommendedData, ...docs])
-        }))
+        if(user.email && user.faculty){
+            fstore.collection(`recommended-analytics`).doc(user.faculty).collection(`available`).onSnapshot((snapshot => {
+                const docs: any = snapshot.docs.map(doc => doc.data())
+    
+                setloading(false)
+                if (docs.length <= 0) {
+                    setnoData(true)
+                    return
+                }
+                setnoData(false)
+                setrecommendedData([...recommendedData, ...docs])
+            }))
+        }
     }, [])
 
     useIonViewDidEnter(() => {
