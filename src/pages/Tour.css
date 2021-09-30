@@ -1,46 +1,41 @@
  ion-toolbar.header-bar {
      --background: rgba(0, 0, 0, 0.33);
      position: fixed;
-
  }
-
-
-
+ 
  .tour-content {
      --background: rgb(228, 231, 240);
-
  }
-
-
+ 
  .tour-content ion-grid,
  .tour-content ion-grid * {
      background: transparent;
  }
-
+ 
  .tour-main>ion-list>ion-grid * {
      padding-top: 0;
      padding-bottom: 0;
      margin-top: 0;
      margin-bottom: 0;
  }
-
+ 
  Link,
  ion-router-link {
      text-decoration: none;
  }
-
+ 
  .tour-main {
      --ion-background-color: #f4f5f8
  }
-
+ 
  .tour-card * {
      --background: rgb(7, 19, 31);
  }
-
+ 
  .tour-card {
      --ion-background-color: black
  }
-
+ 
  .tour-card>ion-img {
      width: 100%;
      object-fit: cover;
@@ -49,29 +44,28 @@
      object-position: center;
      transition: 7s;
  }
-
+ 
  .tour-slides ion-slide {
      max-width: 400px;
  }
-
-
+ 
  .tour-slides ion-text {
      font-size: 12px;
  }
-
+ 
  .tour-slides ion-slide ion-button {
      display: block;
-     width: 100%; 
+     width: 100%;
  }
-
+ 
  * {
      will-change: 'transform';
  }
-
+ 
  .tour-modal {
      min-width: 100%;
  }
-
+ 
  ion-spinner.loading {
      position: absolute;
      ;
@@ -79,56 +73,64 @@
      left: 45%;
      z-index: 0;
  }
-
+ 
  .map-img {
      opacity: 0.36
  }
- .place-slides{
+ 
+ .place-slides {
      padding-bottom: 20px;
  }
-
-
+ 
  body.dark .tour-card>ion-img {
      opacity: 0.6;
  }
-
- body.dark .tour-toolbar{
-    --ion-color-light: #ffffff;
+ 
+ body.dark .tour-toolbar {
+     --ion-color-light: #ffffff;
  }
-
+ 
  body.dark .tour-card {
      background-image: linear-gradient(to top, rgb(0, 0, 0), rgb(0, 0, 0), rgb(22, 21, 21), rgb(15, 13, 43));
      --ion-color-light: #ffffff;
  }
-
+ 
  body.dark .tour-content {
      --background: rgb(13, 20, 27);
  }
-
+ 
  body.dark .map-img {
      opacity: 1
  }
-
+ 
  body.dark ion-content.tour-info {
      --background: rgb(13, 20, 27);
  }
-
+ 
  body.dark ion-content.tour-info ion-text {
      color: rgb(171, 173, 189);
      font-size: 14px;
  }
-
+ 
  .tour-info ion-card {
      filter: hue-rotate(-10deg)
  }
- .tour-video{
-     padding:10px;
+ 
+ .tour-video {
+     padding: 10px;
  }
-
- .tour-video iframe{
+ 
+ .tour-video iframe {
      border: 0;
      border-radius: 10px;
-     width:100%;
+     width: 100%;
      height: 250px;
-
+ }
+ 
+ ion-button.cardButton {
+     --background: linear-gradient(to top, #000, transparent);
+     padding: 0px !important;
+     margin-left: 0px !important;
+     border-radius: 0px !important;
+     width: 100%;
  }

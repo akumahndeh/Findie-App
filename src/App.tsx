@@ -67,8 +67,7 @@ const App: React.FC = () => {
 
     initializeTheme()
 
-    async function push() {
-
+    async function push() { 
       try {
         await Plugins.PushNotifications.register()
         Plugins.PushNotifications.addListener(`registration`, (token: PushNotificationToken) => {
@@ -88,12 +87,9 @@ const App: React.FC = () => {
 
       } catch (err) {
         Plugins.Toast.show({ text: err })
-
       }
     }
-
-
-
+ 
   }, []);
 
 
